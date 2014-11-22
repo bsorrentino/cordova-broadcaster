@@ -9,7 +9,7 @@
 - (void)coolMethod:(CDVInvokedUrlCommand*)command;
 @end
 
-@implementation CDVbroadcaster
+@implementation CDVBroadcaster
 
 - (void)coolMethod:(CDVInvokedUrlCommand*)command
 {
