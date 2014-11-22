@@ -2,16 +2,16 @@
 
 #import <Cordova/CDV.h>
 
-@interface CDVbroadcaster : CDVPlugin {
+@interface CDVBroadcaster : CDVPlugin {
   // Member variables go here.
 }
 
-- (void)coolMethod:(CDVInvokedUrlCommand*)command;
+- (void)fireEvent:(CDVInvokedUrlCommand*)command;
 @end
 
 @implementation CDVBroadcaster
 
-- (void)coolMethod:(CDVInvokedUrlCommand*)command
+- (void)fireEvent:(CDVInvokedUrlCommand*)command
 {
     CDVPluginResult* pluginResult = nil;
     NSString* echo = [command.arguments objectAtIndex:0];
