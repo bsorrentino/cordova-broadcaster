@@ -13,3 +13,14 @@ Android
 =======
 
 > Providing bridge to **[LocalBroadcastManager](http://developer.android.com/reference/android/support/v4/content/LocalBroadcastManager.html)**
+
+
+INSTALL
+========
+
+ ```javascript
+ # cordova create <PATH> [ID [NAME [CONFIG]]] [options]
+ # cd <PATH>
+ # cordova platform add [ios|android]
+ # cordova plugin add https://github.com/bsorrentino/cordova-broadcaster.git
+ ```

@@ -2,14 +2,65 @@
 
 #import "CDVBroadcaster.h"
 
+
+static inline void throwWithName( NSError *error, NSString* name )
+{
+    if (error) {
+        @throw [NSException exceptionWithName:name
+                                       reason:error.debugDescription
+                                     userInfo:@{ @"NSError" : error }];
+    }
+}
+
 @interface CDVBroadcaster () {
   // Member variables go here.
 }
+- (void)fireEvent:(NSString *)eventName data:(NSDictionary*)data
 
 @end
 
+
 @implementation CDVBroadcaster
 
+- (void)fireEvent:(NSString *)eventName data:(NSDictionary*)data
+{
+    if (!self.commandDelegate ) {
+        return;
+    }
+
+    if (eventName == nil || [eventName length] == 0) {
+
+        @throw [NSException exceptionWithName:NSInvalidArgumentException
+                                       reason:@"eventName is null or empty"
+                                     userInfo:nil];
+
+    }
+
+    NSString *jsonDataString = @"{}";
+
+    if( data  ) {
+
+        NSError *error;
+        NSData *jsonData = [NSJSONSerialization dataWithJSONObject:data
+                                                           options:(NSJSONWritingOptions)0
+                                                             error:&error];
+
+        if (! jsonData) {
+
+            throwWithName(error, @"JSON Serialization exception");
+            return;
+
+        }
+
+        jsonDataString = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
+
+
+    }
+
+    [self.commandDelegate evalJs:[NSString stringWithFormat:@"window.broadcaster.fireEvent('%@', %@)", eventName, jsonDataString]];
+
+
+}
 
 - (void)fireNativeEvent:(CDVInvokedUrlCommand*)command
 {
