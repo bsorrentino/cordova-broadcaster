@@ -28,7 +28,9 @@ INSTALL
 USAGE:
 ======
 
-## Javascript
+## From Native to Javascript
+
+### Javascript
 
 ```javascript
     console.log( "register didShow received!" );
@@ -38,12 +40,36 @@ USAGE:
     });
 ```
 
-## IOS
+### IOS
 
-```ObjectiveC
+```Objective-C
     [[NSNotificationCenter defaultCenter] postNotificationName:@"didShow"
                                                         object:nil
                                                       userInfo:@{ @"data":@"test"}];
 ```
 
-## ANDROID
+### ANDROID
+
+## From Javascript to Native
+
+### Javascript
+
+```javascript
+  window.broadcaster.fireNativeEvent( "test.event", { item:'test data' }, function() {
+    console.log( "event fired!" );
+    } );
+ ```
+
+### IOS
+
+```Objective-C
+[[NSNotificationCenter defaultCenter] addObserverForName:@"test.event"
+                                                  object:nil queue:[NSOperationQueue mainQueue]
+                                              usingBlock:^(NSNotification *note) {
+
+                                                      NSLog(@"Handled 'test.event' [%@]", note);
+
+                                                    }];
+```
+
+### ANDROID
