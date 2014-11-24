@@ -64,7 +64,8 @@ USAGE:
 
 ```Objective-C
 [[NSNotificationCenter defaultCenter] addObserverForName:@"test.event"
-                                                  object:nil queue:[NSOperationQueue mainQueue]
+                                                  object:nil
+                                                   queue:[NSOperationQueue mainQueue]
                                               usingBlock:^(NSNotification *note) {
 
                                                       NSLog(@"Handled 'test.event' [%@]", note);
