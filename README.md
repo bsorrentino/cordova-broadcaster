@@ -24,3 +24,26 @@ INSTALL
  # cordova platform add [ios|android]
  # cordova plugin add https://github.com/bsorrentino/cordova-broadcaster.git
  ```
+
+USAGE:
+======
+
+## Javascript
+
+```javascript
+    console.log( "register didShow received!" );
+    window.broadcaster.addEventListener( "didShow", function( e ) {
+
+                console.log( "didShow received!" );
+    });
+```
+
+## IOS
+
+```ObjectiveC
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"didShow"
+                                                        object:nil
+                                                      userInfo:@{ @"data":@"test"}];
+```
+
+## ANDROID

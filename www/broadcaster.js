@@ -31,13 +31,26 @@ module.exports = {
   //},
   addEventListener: function (eventname,f) {
      if (!(eventname in this._channels)) {
-         this._channels[eventname] = channel.create(eventname);
+         var me = this;
+         exec( function() {
+           me._channels[eventname] = channel.create(eventname);
+           me._channels[eventname].subscribe(f);
+         }, function(err)  {
+           console.log( "ERROR addEventListener: " + err)
+         }, "broadcaster", "addEventListener", [ eventname ]);
      }
-     this._channels[eventname].subscribe(f);
+     else {
+       this._channels[eventname].subscribe(f);
+     }
   },
   removeEventListener: function(eventname, f) {
      if (eventname in this._channels) {
-         this._channels[eventname].unsubscribe(f);
+        var me = this;
+        exec( function() {
+          me._channels[eventname].unsubscribe(f);
+        }, function(err)  {
+          console.log( "ERROR removeEventListener: " + err)
+        }, "broadcaster", "removeEventListener", [ eventname ]);
      }
   }
 

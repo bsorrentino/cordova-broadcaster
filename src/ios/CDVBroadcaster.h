@@ -4,6 +4,5 @@
 
 @interface CDVBroadcaster : CDVPlugin
 
-- (void)fireNativeEvent:(CDVInvokedUrlCommand*)command;
 @end
 
