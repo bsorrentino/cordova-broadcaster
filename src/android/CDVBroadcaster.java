@@ -12,12 +12,24 @@ import org.json.JSONObject;
  */
 public class CDVBroadcaster extends CordovaPlugin {
 
+    java.util.Map<String,BroadcastReceiver> receiverMap =
+                    new java.util.HashMap<String,BroadcastReceiver>(10);
+                    
     @Override
     public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
         if (action.equals("fireEvent")) {
             String message = args.getString(0);
             this.fireEvent(message, callbackContext);
             return true;
+        }
+        else if( action.equals("fireNativeEvent")) {
+
+        }
+        else if( action.equals("addEventListener")) {
+
+        }
+        else if( action.equals("removeEventListener")) {
+
         }
         return false;
     }
