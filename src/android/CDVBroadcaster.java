@@ -21,6 +21,7 @@ import org.json.JSONObject;
  */
 public class CDVBroadcaster extends CordovaPlugin {
 
+    public static final String USERDATA = "userdata";
     private static String TAG =  CDVBroadcaster.class.getSimpleName();
 
     public static final String EVENTNAME_ERROR = "event name null or empty.";
@@ -28,9 +29,83 @@ public class CDVBroadcaster extends CordovaPlugin {
     java.util.Map<String,BroadcastReceiver> receiverMap =
                     new java.util.HashMap<String,BroadcastReceiver>(10);
 
-    private void fireEvent() {
+    /**
+     *
+     * @param eventName
+     * @param jsonUserData
+     * @throws JSONException
+     */
+    protected void fireEvent( final String eventName, final Object jsonUserData) throws JSONException {
+
+        String method ;
+        if( jsonUserData != null ) {
+
+            if (!(jsonUserData instanceof JSONObject)) {
+                final JSONObject json = new JSONObject(String.valueOf(jsonUserData)); // CHECK IF VALID
+            }
+
+            method = String.format("window.broadcaster.fireEvent( '%s', %s );", eventName, String.valueOf(jsonUserData));
+        }
+        else {
+            method = String.format("window.broadcaster.fireEvent( '%s', {} );", eventName);
+        }
+        this.webView.evaluateJavascript(method, new ValueCallback<String>() {
+            @Override
+            public void onReceiveValue(String value) {
+                Log.d(TAG, "fireEvent executed!");
+            }
+        });
 
     }
+
+    protected void registerReceiver(android.content.BroadcastReceiver receiver, android.content.IntentFilter filter) {
+        LocalBroadcastManager.getInstance(super.webView.getContext()).registerReceiver(receiver,filter);
+    }
+
+    protected void unregisterReceiver(android.content.BroadcastReceiver receiver) {
+        LocalBroadcastManager.getInstance(super.webView.getContext()).unregisterReceiver(receiver);
+    }
+
+    protected boolean sendBroadcast(android.content.Intent intent) {
+        return LocalBroadcastManager.getInstance(super.webView.getContext()).sendBroadcast(intent);
+    }
+
+    @Override
+    public Object onMessage(String id, Object data) {
+
+        try {
+            fireEvent( id, data );
+        } catch (JSONException e) {
+            Log.e(TAG, "'userdata' is not a valid json object!");
+            return Boolean.FALSE;
+        }
+        return Boolean.TRUE;
+    }
+
+    private void fireNativeEvent( final String eventName, JSONObject userData ) {
+        if( eventName == null ) {
+            throw new IllegalArgumentException("eventName parameter is null!");
+        }
+
+        final Intent intent = new Intent(eventName);
+
+        if( userData != null ) {
+            Bundle b = new Bundle();
+            b.putString(USERDATA, userData.toString());
+            intent.putExtras(b);
+        }
+
+        sendBroadcast( intent );
+    }
+
+    /**
+     *
+     * @param action          The action to execute.
+     * @param args            The exec() arguments.
+     * @param callbackContext The callback context used when calling back into JavaScript.
+     * @return
+     * @throws JSONException
+     */
     @Override
     public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
         if( action.equals("fireNativeEvent")) {
@@ -40,6 +115,15 @@ public class CDVBroadcaster extends CordovaPlugin {
                 callbackContext.error(EVENTNAME_ERROR);
 
             }
+            final JSONObject userData = args.getJSONObject(1);
+
+            cordova.getThreadPool().execute(new Runnable() {
+                @Override
+                public void run() {
+                    fireNativeEvent(eventName, userData);
+                }
+            });
+
             return true;
         }
         else {
@@ -62,18 +146,9 @@ public class CDVBroadcaster extends CordovaPlugin {
                             // parse the JSON passed as a string.
                             try {
 
-                                final String userData = b.getString("userdata", "{}");
+                                final String userData = b.getString(USERDATA, "{}");
 
-                                final JSONObject json = new JSONObject(userData); // CHECK IF VALID
-
-                                String method = String.format( "window.broadcaster.fireEvent( '%s', %s );", eventName, userData);
-
-                                CDVBroadcaster.this.webView.evaluateJavascript(method, new ValueCallback<String>() {
-                                    @Override
-                                    public void onReceiveValue(String value) {
-                                        Log.d(TAG, "fireEvent executed!");
-                                    }
-                                });
+                                fireEvent( eventName, userData);
 
                             } catch (JSONException e) {
                                 Log.e(TAG, "'userdata' is not a valid json object!");
@@ -82,8 +157,7 @@ public class CDVBroadcaster extends CordovaPlugin {
                         }
                     };
 
-                    LocalBroadcastManager.getInstance(super.webView.getContext())
-                            .registerReceiver(r, new IntentFilter(eventName));
+                    registerReceiver(r, new IntentFilter(eventName));
 
                     receiverMap.put(eventName, r);
                 }
@@ -102,8 +176,7 @@ public class CDVBroadcaster extends CordovaPlugin {
 
                 if (r != null) {
 
-                    LocalBroadcastManager.getInstance(super.webView.getContext())
-                            .unregisterReceiver(r);
+                    unregisterReceiver(r);
 
 
                 }
@@ -114,18 +187,19 @@ public class CDVBroadcaster extends CordovaPlugin {
         return false;
     }
 
+    /**
+     *
+     */
     @Override
     public void onDestroy() {
-        super.onDestroy();
-
         // deregister receiver
         for( BroadcastReceiver r : receiverMap.values() ) {
-            LocalBroadcastManager.getInstance(super.webView.getContext())
-                    .unregisterReceiver(r);
-
+                    unregisterReceiver(r);
         }
 
         receiverMap.clear();
+
+        super.onDestroy();
 
     }
 
