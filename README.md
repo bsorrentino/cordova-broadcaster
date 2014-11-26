@@ -43,12 +43,22 @@ USAGE:
 ### IOS
 
 ```Objective-C
-    [[NSNotificationCenter defaultCenter] postNotificationName:@"didShow"
-                                                        object:nil
-                                                      userInfo:@{ @"data":@"test"}];
+[[NSNotificationCenter defaultCenter] postNotificationName:@"didShow"
+                                                    object:nil
+                                                  userInfo:@{ @"data":@"test"}];
 ```
 
 ### ANDROID
+
+```Java
+final Intent intent = new Intent("didShow");
+
+Bundle b = new Bundle();
+b.putString( "userdata", "{ data: 'test'}" );
+intent.putExtras( b);
+
+LocalBroadcastManager.getInstance(this).sendBroadcastSync(intent);
+```
 
 ## From Javascript to Native
 
@@ -74,3 +84,17 @@ USAGE:
 ```
 
 ### ANDROID
+
+```Java
+final BroadcastReceiver receiver = new BroadcastReceiver() {
+  @Override
+  public void onReceive(Context context, Intent intent) {
+          Log.d("CDVBroadcaster",
+            String.format("Naptive event [%s] received", intent.getAction()));
+  }
+};
+
+LocalBroadcastManager.getInstance(this)
+            .registerReceiver(receiver, new IntentFilter("test.event"));
+}
+```
