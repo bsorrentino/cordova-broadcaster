@@ -35,8 +35,8 @@ USAGE:
 ```javascript
     console.log( "register didShow received!" );
     window.broadcaster.addEventListener( "didShow", function( e ) {
-
-                console.log( "didShow received!" );
+                //log: didShow received! userInfo: {"data":"test"}
+                console.log( "didShow received! userInfo: " + JSON.stringify(e)  );
     });
 ```
 
@@ -78,7 +78,7 @@ LocalBroadcastManager.getInstance(this).sendBroadcastSync(intent);
                                                    queue:[NSOperationQueue mainQueue]
                                               usingBlock:^(NSNotification *note) {
 
-                                                      NSLog(@"Handled 'test.event' [%@]", note);
+                                                      NSLog(@"Handled 'test.event' [%@]", note.userInfo[@"item"]);
 
                                                     }];
 ```
@@ -89,8 +89,10 @@ LocalBroadcastManager.getInstance(this).sendBroadcastSync(intent);
 final BroadcastReceiver receiver = new BroadcastReceiver() {
   @Override
   public void onReceive(Context context, Intent intent) {
+          final JSONObject data = new JSONObject( intent.getBundle().getString("userdata"));
+
           Log.d("CDVBroadcaster",
-            String.format("Naptive event [%s] received", intent.getAction()));
+            String.format("Naptive event [%s] received with data [%s]", intent.getAction(), data.toString()));
   }
 };
 
