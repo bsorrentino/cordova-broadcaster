@@ -49,13 +49,15 @@ public class CDVBroadcaster extends CordovaPlugin {
         else {
             method = String.format("window.broadcaster.fireEvent( '%s', {} );", eventName);
         }
+        this.webView.sendJavascript(method);
+        /*
         this.webView.evaluateJavascript(method, new ValueCallback<String>() {
             @Override
             public void onReceiveValue(String value) {
                 Log.d(TAG, "fireEvent executed!");
             }
         });
-
+        */
     }
 
     protected void registerReceiver(android.content.BroadcastReceiver receiver, android.content.IntentFilter filter) {
