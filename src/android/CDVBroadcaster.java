@@ -148,9 +148,14 @@ public class CDVBroadcaster extends CordovaPlugin {
                             // parse the JSON passed as a string.
                             try {
 
-                                final String userData = b.getString(USERDATA, "{}");
+                                if (b != null) {//  in some broadcast there might be no extra info
+                                    final String userData = b.getString(USERDATA, "{}");
 
-                                fireEvent( eventName, userData);
+                                    fireEvent( eventName, userData);
+                                } else {
+                                    Log.v("CDVBroadcaster", "No extra information in intent bundle");
+                                    fireEvent( eventName, null);
+                                }
 
                             } catch (JSONException e) {
                                 Log.e(TAG, "'userdata' is not a valid json object!");
