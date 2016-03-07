@@ -21,7 +21,7 @@
     </config-file>
     <config-file parent="/*" target="AndroidManifest.xml" />
     <source-file src="src/android/CDVBroadcaster.java" target-dir="src/org/bsc/cordova" />
-    <source-file src="extras/android/support-v4-r7.jar" target-dir="libs" framework="true" />
+    <framework src="com.android.support:support-v4:+" />
   </platform>
   <platform name="ios">
     <config-file parent="/*" target="config.xml">
