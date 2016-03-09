@@ -128,63 +128,65 @@ public class CDVBroadcaster extends CordovaPlugin {
 
             return true;
         }
-        else {
-            if (action.equals("addEventListener")) {
+        else if (action.equals("addEventListener")) {
 
-                final String eventName = args.getString(0);
-                if (eventName == null || eventName.isEmpty()) {
-                    callbackContext.error(EVENTNAME_ERROR);
-                    return false;
-                }
-                if (!receiverMap.containsKey(eventName)) {
-
-                    final BroadcastReceiver r = new BroadcastReceiver() {
-
-                        @Override
-                        public void onReceive(Context context, final Intent intent) {
-
-                            final Bundle b = intent.getExtras();
-
-                            // parse the JSON passed as a string.
-                            try {
-
-                                final String userData = b.getString(USERDATA, "{}");
-
-                                fireEvent( eventName, userData);
-
-                            } catch (JSONException e) {
-                                Log.e(TAG, "'userdata' is not a valid json object!");
-                            }
-
-                        }
-                    };
-
-                    registerReceiver(r, new IntentFilter(eventName));
-
-                    receiverMap.put(eventName, r);
-                }
-                callbackContext.success();
-
-                return true;
-            } else if (action.equals("removeEventListener")) {
-
-                final String eventName = args.getString(0);
-                if (eventName == null || eventName.isEmpty()) {
-                    callbackContext.error(EVENTNAME_ERROR);
-                    return false;
-                }
-
-                BroadcastReceiver r = receiverMap.remove(eventName);
-
-                if (r != null) {
-
-                    unregisterReceiver(r);
-
-
-                }
-                callbackContext.success();
-                return true;
+            final String eventName = args.getString(0);
+            if (eventName == null || eventName.isEmpty()) {
+                callbackContext.error(EVENTNAME_ERROR);
+                return false;
             }
+            if (!receiverMap.containsKey(eventName)) {
+
+                final BroadcastReceiver r = new BroadcastReceiver() {
+
+                    @Override
+                    public void onReceive(Context context, final Intent intent) {
+
+                        final Bundle b = intent.getExtras();
+
+                        // parse the JSON passed as a string.
+                        try {
+
+                            String userData = "{}";
+                            if (b != null) {//  in some broadcast there might be no extra info
+                                userData = b.getString(USERDATA, "{}");
+                            } else {
+                                Log.v(TAG, "No extra information in intent bundle");
+                            }
+                            fireEvent(eventName, userData);
+
+                        } catch (JSONException e) {
+                            Log.e(TAG, "'userdata' is not a valid json object!");
+                        }
+
+                    }
+                };
+
+                registerReceiver(r, new IntentFilter(eventName));
+
+                receiverMap.put(eventName, r);
+            }
+            callbackContext.success();
+
+            return true;
+        } else if (action.equals("removeEventListener")) {
+
+            final String eventName = args.getString(0);
+            if (eventName == null || eventName.isEmpty()) {
+                callbackContext.error(EVENTNAME_ERROR);
+                return false;
+            }
+
+            BroadcastReceiver r = receiverMap.remove(eventName);
+
+            if (r != null) {
+
+                unregisterReceiver(r);
+
+
+            }
+            callbackContext.success();
+            return true;
         }
         return false;
     }

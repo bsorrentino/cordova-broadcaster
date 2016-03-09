@@ -17,8 +17,8 @@
     },
     "cordova-plugin-broadcaster": {
         "source": {
-            "type": "local",
-            "path": "../broadcaster"
+            "type": "registry",
+            "id": "cordova-plugin-broadcaster"
         },
         "is_top_level": true,
         "variables": {}

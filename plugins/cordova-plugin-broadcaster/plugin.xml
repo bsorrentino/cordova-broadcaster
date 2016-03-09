@@ -1,11 +1,11 @@
 <?xml version='1.0' encoding='utf-8'?>
 <plugin id="cordova-plugin-broadcaster"
-        version="2.0.1"
+        version="2.0.5"
         xmlns="http://apache.org/cordova/ns/plugins/1.0"
         xmlns:android="http://schemas.android.com/apk/res/android">
 
    <engines>
-      <engine name="cordova" version=">=4.0.0" /><!-- Needs cordova/urlutil -->
+      <engine name="cordova" version=">=3.9.1" /><!-- Needs cordova/urlutil -->
     </engines>
 
   <name>broadcaster</name>
@@ -21,7 +21,7 @@
     </config-file>
     <config-file parent="/*" target="AndroidManifest.xml" />
     <source-file src="src/android/CDVBroadcaster.java" target-dir="src/org/bsc/cordova" />
-    <source-file src="extras/android/support-v4-r7.jar" target-dir="libs" framework="true" />
+    <framework src="com.android.support:support-v4:+" />
   </platform>
   <platform name="ios">
     <config-file parent="/*" target="config.xml">
