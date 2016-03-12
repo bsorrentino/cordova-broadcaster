@@ -44,25 +44,22 @@ var app = {
         listeningElement.setAttribute('style', 'display:none;');
         receivedElement.setAttribute('style', 'display:block;');
 
+        receivedElement.onclick = function() {
+              window.broadcaster.fireNativeEvent( "test.event", { item:'test data' }, function() {
+                  console.log( "event fired!" );
+              });
+        }
+
         console.log('Received Event: ' + id);
         this.broadcasterInit();
     },
     broadcasterInit: function() {
 
-        console.log( "register didShow received!" );
-        window.broadcaster.addEventListener( "didShow", function( e ) {
-
-                    console.log( "didShow received! " + JSON.stringify(e) );
-        });
-
-        window.setTimeout( function()  {
-
-          window.broadcaster.fireNativeEvent( "test.event", { item:'test data' }, function() {
-    console.log( "event fired!" );
-    } );
-        }, 2000);
-    }
-
+            console.log( "register didShow listener!" );
+            window.broadcaster.addEventListener( "didShow", function( e ) {
+                console.log( "didShow event received! " + JSON.stringify(e) );
+            });
+        }
 };
 
 app.initialize();
