@@ -1,9 +1,11 @@
 package org.bsc.cordova;
 
+import android.annotation.TargetApi;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
@@ -37,27 +39,18 @@ public class CDVBroadcaster extends CordovaPlugin {
      */
     protected void fireEvent( final String eventName, final Object jsonUserData) throws JSONException {
 
-        String method ;
+        String method = null; ;
         if( jsonUserData != null ) {
-
+            final String data = String.valueOf(jsonUserData);
             if (!(jsonUserData instanceof JSONObject)) {
-                final JSONObject json = new JSONObject(String.valueOf(jsonUserData)); // CHECK IF VALID
+                final JSONObject json = new JSONObject(data); // CHECK IF VALID
             }
-
-            method = String.format("window.broadcaster.fireEvent( '%s', %s );", eventName, String.valueOf(jsonUserData));
+            method = String.format("window.broadcaster.fireEvent( '%s', %s );", eventName, data);
         }
         else {
             method = String.format("window.broadcaster.fireEvent( '%s', {} );", eventName);
         }
-        this.webView.sendJavascript(method);
-        /*
-        this.webView.evaluateJavascript(method, new ValueCallback<String>() {
-            @Override
-            public void onReceiveValue(String value) {
-                Log.d(TAG, "fireEvent executed!");
-            }
-        });
-        */
+        sendJavascript(method);
     }
 
     protected void registerReceiver(android.content.BroadcastReceiver receiver, android.content.IntentFilter filter) {
@@ -78,7 +71,7 @@ public class CDVBroadcaster extends CordovaPlugin {
         try {
             fireEvent( id, data );
         } catch (JSONException e) {
-            Log.e(TAG, "'userdata' is not a valid json object!");
+            Log.e(TAG, String.format("userdata [%s] for event [%s] is not a valid json object!", data, id));
             return Boolean.FALSE;
         }
         return Boolean.TRUE;
@@ -119,6 +112,7 @@ public class CDVBroadcaster extends CordovaPlugin {
             }
             final JSONObject userData = args.getJSONObject(1);
 
+
             cordova.getThreadPool().execute(new Runnable() {
                 @Override
                 public void run() {
@@ -126,6 +120,7 @@ public class CDVBroadcaster extends CordovaPlugin {
                 }
             });
 
+            callbackContext.success();
             return true;
         }
         else if (action.equals("addEventListener")) {
@@ -207,4 +202,17 @@ public class CDVBroadcaster extends CordovaPlugin {
 
     }
 
+    @TargetApi(Build.VERSION_CODES.KITKAT)
+    private void sendJavascript(final String javascript) {
+        webView.getView().post(new Runnable() {
+           @Override
+           public void run() {
+               if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                    webView.sendJavascript(javascript);
+                   } else {
+                    webView.loadUrl("javascript:".concat(javascript));
+                    }
+               }
+            });
+    }
 }
