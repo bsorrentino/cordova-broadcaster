@@ -15,6 +15,11 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.lang.reflect.Array;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Set;
+
 /**
  * This class echoes a string called from JavaScript.
  */
@@ -113,7 +118,6 @@ public class CDVBroadcaster extends CordovaPlugin {
             }
             final JSONObject userData = args.getJSONObject(1);
 
-
             cordova.getThreadPool().execute(new Runnable() {
                 @Override
                 public void run() {
@@ -137,24 +141,13 @@ public class CDVBroadcaster extends CordovaPlugin {
 
                     @Override
                     public void onReceive(Context context, final Intent intent) {
-
-                        final Bundle b = intent.getExtras();
-
-                        // parse the JSON passed as a string.
+                        final Bundle bundle = intent.getExtras();
+                        JSONObject jsonObject = toJsonObject(bundle);
                         try {
-
-                            String userData = "{}";
-                            if (b != null) {//  in some broadcast there might be no extra info
-                                userData = b.getString(USERDATA, "{}");
-                            } else {
-                                Log.v(TAG, "No extra information in intent bundle");
-                            }
-                            fireEvent(eventName, userData);
-
+                            fireEvent(eventName, jsonObject);
                         } catch (JSONException e) {
-                            Log.e(TAG, "'userdata' is not a valid json object!");
+                            Log.e(TAG, String.format("Error firing event '%s'", eventName), e);
                         }
-
                     }
                 };
 
@@ -178,13 +171,99 @@ public class CDVBroadcaster extends CordovaPlugin {
             if (r != null) {
 
                 unregisterReceiver(r);
-
-
             }
             callbackContext.success();
             return true;
         }
         return false;
+    }
+
+    private static JSONObject toJsonObject(Bundle bundle) {
+        if (bundle == null) {
+            Log.v(TAG, "No extra information in intent bundle");
+            return new JSONObject();
+        }
+
+        JSONObject jsonObject = new JSONObject();
+
+        Set<String> keys = bundle.keySet();
+        for (String key: keys) {
+            Object value = bundle.get(key);
+            try {
+                jsonObject.put(key, wrapObject(value));
+            } catch (JSONException e) {
+                Log.e(TAG, String.format("Unable to convert bundle key '%s' to JSON", key), e);
+            }
+        }
+
+        return jsonObject;
+    }
+
+    /**
+     * Wraps the given object if necessary.
+     * Copied from https://android.googlesource.com/platform/libcore/+/master/json/src/main/java/org/json/JSONObject.java
+     *
+     * <p>If the object is null or , returns {@link JSONObject#NULL}.
+     * If the object is a {@code JSONArray} or {@code JSONObject}, no wrapping is necessary.
+     * If the object is {@code NULL}, no wrapping is necessary.
+     * If the object is an array or {@code Collection}, returns an equivalent {@code JSONArray}.
+     * If the object is a {@code Map}, returns an equivalent {@code JSONObject}.
+     * If the object is a primitive wrapper type or {@code String}, returns the object.
+     * Otherwise if the object is from a {@code java} package, returns the result of {@code toString}.
+     * If wrapping fails, returns null.
+     */
+    private static Object wrapObject(Object o) {
+        if (o == null) {
+            return JSONObject.NULL;
+        }
+        if (o instanceof JSONArray || o instanceof JSONObject) {
+            return o;
+        }
+        if (o.equals(JSONObject.NULL)) {
+            return o;
+        }
+        try {
+            if (o instanceof Collection) {
+                return new JSONArray((Collection) o);
+            } else if (o.getClass().isArray()) {
+                return arrayToJsonArray(o);
+            }
+            if (o instanceof Map) {
+                return new JSONObject((Map) o);
+            }
+            if (o instanceof Boolean ||
+                    o instanceof Byte ||
+                    o instanceof Character ||
+                    o instanceof Double ||
+                    o instanceof Float ||
+                    o instanceof Integer ||
+                    o instanceof Long ||
+                    o instanceof Short ||
+                    o instanceof String) {
+                return o;
+            }
+            if (o.getClass().getPackage().getName().startsWith("java.")) {
+                return o.toString();
+            }
+        } catch (Exception ignored) {
+        }
+        return null;
+    }
+
+    /**
+     * Creates a new {@code JSONArray} with values from the given primitive array.
+     * Partially copied from https://android.googlesource.com/platform/libcore/+/master/json/src/main/java/org/json/JSONArray.java
+     */
+    private static JSONArray arrayToJsonArray(Object array) throws JSONException {
+        if (!array.getClass().isArray()) {
+            throw new JSONException("Not a primitive array: " + array.getClass());
+        }
+        final int length = Array.getLength(array);
+        JSONArray jsonArray = new JSONArray();
+        for (int i = 0; i < length; ++i) {
+            jsonArray.put(wrapObject(Array.get(array, i)));
+        }
+        return jsonArray;
     }
 
     /**
@@ -200,7 +279,6 @@ public class CDVBroadcaster extends CordovaPlugin {
         receiverMap.clear();
 
         super.onDestroy();
-
     }
 
     @TargetApi(Build.VERSION_CODES.KITKAT)
