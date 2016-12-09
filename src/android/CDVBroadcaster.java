@@ -7,13 +7,10 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
-import android.webkit.ValueCallback;
 
-import org.apache.cordova.CordovaPlugin;
 import org.apache.cordova.CallbackContext;
-
+import org.apache.cordova.CordovaPlugin;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -39,7 +36,7 @@ public class CDVBroadcaster extends CordovaPlugin {
      */
     protected void fireEvent( final String eventName, final Object jsonUserData) throws JSONException {
 
-        String method = null; ;
+        String method = null;
         if( jsonUserData != null ) {
             final String data = String.valueOf(jsonUserData);
             if (!(jsonUserData instanceof JSONObject)) {
@@ -53,16 +50,20 @@ public class CDVBroadcaster extends CordovaPlugin {
         sendJavascript(method);
     }
 
-    protected void registerReceiver(android.content.BroadcastReceiver receiver, android.content.IntentFilter filter) {
-        LocalBroadcastManager.getInstance(super.webView.getContext()).registerReceiver(receiver,filter);
+    protected void registerReceiver(BroadcastReceiver receiver, IntentFilter filter) {
+        getContext().registerReceiver(receiver, filter);
     }
 
-    protected void unregisterReceiver(android.content.BroadcastReceiver receiver) {
-        LocalBroadcastManager.getInstance(super.webView.getContext()).unregisterReceiver(receiver);
+    protected void unregisterReceiver(BroadcastReceiver receiver) {
+        getContext().unregisterReceiver(receiver);
     }
 
-    protected boolean sendBroadcast(android.content.Intent intent) {
-        return LocalBroadcastManager.getInstance(super.webView.getContext()).sendBroadcast(intent);
+    protected void sendBroadcast(Intent intent) {
+        getContext().sendBroadcast(intent);
+    }
+
+    private Context getContext() {
+        return super.webView.getContext();
     }
 
     @Override
