@@ -7,7 +7,7 @@
         "files": {}
     },
     "installed_plugins": {
-        "cordova-plugin-whitelist": {
+        "cordova-plugin-broadcaster": {
             "PACKAGE_NAME": "org.bsc.broadcasterApp"
         },
         "cordova-plugin-console": {
@@ -16,7 +16,7 @@
         "cordova-plugin-device": {
             "PACKAGE_NAME": "org.bsc.broadcasterApp"
         },
-        "cordova-plugin-broadcaster": {
+        "cordova-plugin-whitelist": {
             "PACKAGE_NAME": "org.bsc.broadcasterApp"
         }
     },
