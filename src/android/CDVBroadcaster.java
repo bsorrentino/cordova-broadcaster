@@ -17,6 +17,7 @@ import org.json.JSONObject;
 
 import java.lang.reflect.Array;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -25,7 +26,6 @@ import java.util.Set;
  */
 public class CDVBroadcaster extends CordovaPlugin {
 
-    public static final String USERDATA = "userdata";
     private static String TAG =  CDVBroadcaster.class.getSimpleName();
 
     public static final String EVENTNAME_ERROR = "event name null or empty.";
@@ -36,15 +36,15 @@ public class CDVBroadcaster extends CordovaPlugin {
     /**
      *
      * @param eventName
-     * @param jsonUserData
+     * @param eventData
      * @throws JSONException
      */
-    protected void fireEvent( final String eventName, final Object jsonUserData) throws JSONException {
+    protected void fireEvent( final String eventName, final Object eventData) throws JSONException {
 
         String method = null;
-        if( jsonUserData != null ) {
-            final String data = String.valueOf(jsonUserData);
-            if (!(jsonUserData instanceof JSONObject)) {
+        if( eventData != null ) {
+            final String data = String.valueOf(eventData);
+            if (!(eventData instanceof JSONObject)) {
                 final JSONObject json = new JSONObject(data); // CHECK IF VALID
             }
             method = String.format("window.broadcaster.fireEvent( '%s', %s );", eventName, data);
@@ -77,23 +77,22 @@ public class CDVBroadcaster extends CordovaPlugin {
         try {
             fireEvent( id, data );
         } catch (JSONException e) {
-            Log.e(TAG, String.format("userdata [%s] for event [%s] is not a valid json object!", data, id));
+            Log.e(TAG, String.format("data [%s] for event [%s] is not a valid json object!", data, id));
             return Boolean.FALSE;
         }
         return Boolean.TRUE;
     }
 
-    private void fireNativeEvent( final String eventName, JSONObject userData ) {
+    private void fireNativeEvent( final String eventName, JSONObject eventData ) {
         if( eventName == null ) {
             throw new IllegalArgumentException("eventName parameter is null!");
         }
 
         final Intent intent = new Intent(eventName);
 
-        if( userData != null ) {
-            Bundle b = new Bundle();
-            b.putString(USERDATA, userData.toString());
-            intent.putExtras(b);
+        if(eventData != null ) {
+            Bundle bundle = toBundle(eventData);
+            intent.putExtras(bundle);
         }
 
         sendBroadcast( intent );
@@ -116,12 +115,12 @@ public class CDVBroadcaster extends CordovaPlugin {
                 callbackContext.error(EVENTNAME_ERROR);
 
             }
-            final JSONObject userData = args.getJSONObject(1);
+            final JSONObject eventData = args.getJSONObject(1);
 
             cordova.getThreadPool().execute(new Runnable() {
                 @Override
                 public void run() {
-                    fireNativeEvent(eventName, userData);
+                    fireNativeEvent(eventName, eventData);
                 }
             });
 
@@ -176,6 +175,46 @@ public class CDVBroadcaster extends CordovaPlugin {
             return true;
         }
         return false;
+    }
+
+    private static Bundle toBundle(JSONObject jsonObject) {
+        Bundle bundle = new Bundle();
+
+        // iterate through all keys in JSON object
+        Iterator iterator = jsonObject.keys();
+        while(iterator.hasNext()) {
+            String key = (String)iterator.next();
+
+            Object value = null;
+            try {
+                value = jsonObject.get(key);
+            } catch (JSONException e) {
+                // this should never happen since we are explicitly iterator through the keys
+                Log.e(TAG, String.format("Error reading '%s' from JSON object", key), e);
+            }
+
+            if (value != null) {
+                if (value instanceof Boolean) {
+                    bundle.putBoolean(key, (Boolean) value);
+                } else if (value instanceof Double) {
+                    bundle.putDouble(key, (Double)value);
+                } else if (value instanceof Integer) {
+                    bundle.putInt(key, (Integer) value);
+                } else if (value instanceof JSONArray) {
+                    // TODO: handle JSONArray properties better
+                    bundle.putString(key, value.toString());
+                } else if (value instanceof JSONObject) {
+                    // TODO: handle JSONObject properties better
+                    bundle.putString(key, value.toString());
+                } else if (value instanceof Long) {
+                    bundle.putLong(key, (Long) value);
+                } else if (value instanceof String) {
+                    bundle.putString(key, (String) value);
+                }
+            }
+        }
+
+        return bundle;
     }
 
     private static JSONObject toJsonObject(Bundle bundle) {
