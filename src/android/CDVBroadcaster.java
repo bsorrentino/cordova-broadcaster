@@ -7,43 +7,46 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.content.LocalBroadcastManager;
+import android.util.Base64;
 import android.util.Log;
-import android.webkit.ValueCallback;
 
-import org.apache.cordova.CordovaPlugin;
 import org.apache.cordova.CallbackContext;
-
+import org.apache.cordova.CordovaPlugin;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.lang.reflect.Array;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+
 /**
- * This class echoes a string called from JavaScript.
+ * This plugin allows access to native Android broadcasts from JavaScript.
  */
 public class CDVBroadcaster extends CordovaPlugin {
 
-    public static final String USERDATA = "userdata";
     private static String TAG =  CDVBroadcaster.class.getSimpleName();
 
-    public static final String EVENTNAME_ERROR = "event name null or empty.";
+    private static final String EVENT_NAME_ERROR = "event name null or empty.";
 
-    java.util.Map<String,BroadcastReceiver> receiverMap =
+    private java.util.Map<String,BroadcastReceiver> receiverMap =
                     new java.util.HashMap<String,BroadcastReceiver>(10);
 
     /**
-     *
-     * @param eventName
-     * @param jsonUserData
+     * Fire JavaScript event.
+     * @param eventName name of event to trigger.
+     * @param eventData data for event.
      * @throws JSONException
      */
-    protected void fireEvent( final String eventName, final Object jsonUserData) throws JSONException {
+    private void fireEvent(final String eventName, final Object eventData) throws JSONException {
 
-        String method = null; ;
-        if( jsonUserData != null ) {
-            final String data = String.valueOf(jsonUserData);
-            if (!(jsonUserData instanceof JSONObject)) {
-                final JSONObject json = new JSONObject(data); // CHECK IF VALID
+        String method;
+        if( eventData != null ) {
+            final String data = String.valueOf(eventData);
+            if (!(eventData instanceof JSONObject)) {
+                new JSONObject(data); // CHECK IF VALID
             }
             method = String.format("window.broadcaster.fireEvent( '%s', %s );", eventName, data);
         }
@@ -53,16 +56,20 @@ public class CDVBroadcaster extends CordovaPlugin {
         sendJavascript(method);
     }
 
-    protected void registerReceiver(android.content.BroadcastReceiver receiver, android.content.IntentFilter filter) {
-        LocalBroadcastManager.getInstance(super.webView.getContext()).registerReceiver(receiver,filter);
+    private void registerReceiver(BroadcastReceiver receiver, IntentFilter filter) {
+        getContext().registerReceiver(receiver, filter);
     }
 
-    protected void unregisterReceiver(android.content.BroadcastReceiver receiver) {
-        LocalBroadcastManager.getInstance(super.webView.getContext()).unregisterReceiver(receiver);
+    private void unregisterReceiver(BroadcastReceiver receiver) {
+        getContext().unregisterReceiver(receiver);
     }
 
-    protected boolean sendBroadcast(android.content.Intent intent) {
-        return LocalBroadcastManager.getInstance(super.webView.getContext()).sendBroadcast(intent);
+    private void sendBroadcast(Intent intent) {
+        getContext().sendBroadcast(intent);
+    }
+
+    private Context getContext() {
+        return super.webView.getContext();
     }
 
     @Override
@@ -71,23 +78,22 @@ public class CDVBroadcaster extends CordovaPlugin {
         try {
             fireEvent( id, data );
         } catch (JSONException e) {
-            Log.e(TAG, String.format("userdata [%s] for event [%s] is not a valid json object!", data, id));
+            Log.e(TAG, String.format("data [%s] for event [%s] is not a valid json object!", data, id));
             return Boolean.FALSE;
         }
         return Boolean.TRUE;
     }
 
-    private void fireNativeEvent( final String eventName, JSONObject userData ) {
+    private void fireNativeEvent( final String eventName, JSONObject eventData ) {
         if( eventName == null ) {
             throw new IllegalArgumentException("eventName parameter is null!");
         }
 
         final Intent intent = new Intent(eventName);
 
-        if( userData != null ) {
-            Bundle b = new Bundle();
-            b.putString(USERDATA, userData.toString());
-            intent.putExtras(b);
+        if(eventData != null ) {
+            Bundle bundle = toBundle(eventData);
+            intent.putExtras(bundle);
         }
 
         sendBroadcast( intent );
@@ -98,7 +104,7 @@ public class CDVBroadcaster extends CordovaPlugin {
      * @param action          The action to execute.
      * @param args            The exec() arguments.
      * @param callbackContext The callback context used when calling back into JavaScript.
-     * @return
+     * @return true if an action was executed, false if not.
      * @throws JSONException
      */
     @Override
@@ -107,16 +113,15 @@ public class CDVBroadcaster extends CordovaPlugin {
 
             final String eventName = args.getString(0);
             if( eventName==null || eventName.isEmpty() ) {
-                callbackContext.error(EVENTNAME_ERROR);
+                callbackContext.error(EVENT_NAME_ERROR);
 
             }
-            final JSONObject userData = args.getJSONObject(1);
-
+            final JSONObject eventData = args.getJSONObject(1);
 
             cordova.getThreadPool().execute(new Runnable() {
                 @Override
                 public void run() {
-                    fireNativeEvent(eventName, userData);
+                    fireNativeEvent(eventName, eventData);
                 }
             });
 
@@ -127,7 +132,7 @@ public class CDVBroadcaster extends CordovaPlugin {
 
             final String eventName = args.getString(0);
             if (eventName == null || eventName.isEmpty()) {
-                callbackContext.error(EVENTNAME_ERROR);
+                callbackContext.error(EVENT_NAME_ERROR);
                 return false;
             }
             if (!receiverMap.containsKey(eventName)) {
@@ -136,24 +141,13 @@ public class CDVBroadcaster extends CordovaPlugin {
 
                     @Override
                     public void onReceive(Context context, final Intent intent) {
-
-                        final Bundle b = intent.getExtras();
-
-                        // parse the JSON passed as a string.
+                        final Bundle bundle = intent.getExtras();
+                        JSONObject jsonObject = toJsonObject(bundle);
                         try {
-
-                            String userData = "{}";
-                            if (b != null) {//  in some broadcast there might be no extra info
-                                userData = b.getString(USERDATA, "{}");
-                            } else {
-                                Log.v(TAG, "No extra information in intent bundle");
-                            }
-                            fireEvent(eventName, userData);
-
+                            fireEvent(eventName, jsonObject);
                         } catch (JSONException e) {
-                            Log.e(TAG, "'userdata' is not a valid json object!");
+                            Log.e(TAG, String.format("Error firing event '%s'", eventName), e);
                         }
-
                     }
                 };
 
@@ -168,7 +162,7 @@ public class CDVBroadcaster extends CordovaPlugin {
 
             final String eventName = args.getString(0);
             if (eventName == null || eventName.isEmpty()) {
-                callbackContext.error(EVENTNAME_ERROR);
+                callbackContext.error(EVENT_NAME_ERROR);
                 return false;
             }
 
@@ -177,8 +171,6 @@ public class CDVBroadcaster extends CordovaPlugin {
             if (r != null) {
 
                 unregisterReceiver(r);
-
-
             }
             callbackContext.success();
             return true;
@@ -186,9 +178,138 @@ public class CDVBroadcaster extends CordovaPlugin {
         return false;
     }
 
+    private static Bundle toBundle(JSONObject jsonObject) {
+        Bundle bundle = new Bundle();
+
+        // iterate through all keys in JSON object
+        Iterator iterator = jsonObject.keys();
+        while(iterator.hasNext()) {
+            String key = (String)iterator.next();
+
+            Object value = null;
+            try {
+                value = jsonObject.get(key);
+            } catch (JSONException e) {
+                // this should never happen since we are explicitly iterator through the keys
+                Log.e(TAG, String.format("Error reading '%s' from JSON object", key), e);
+            }
+
+            if (value != null) {
+                if (value instanceof Boolean) {
+                    bundle.putBoolean(key, (Boolean) value);
+                } else if (value instanceof Double) {
+                    bundle.putDouble(key, (Double)value);
+                } else if (value instanceof Integer) {
+                    bundle.putInt(key, (Integer) value);
+                } else if (value instanceof JSONArray) {
+                    // TODO: handle JSONArray properties better
+                    bundle.putString(key, value.toString());
+                } else if (value instanceof JSONObject) {
+                    // TODO: handle JSONObject properties better
+                    bundle.putString(key, value.toString());
+                } else if (value instanceof Long) {
+                    bundle.putLong(key, (Long) value);
+                } else if (value instanceof String) {
+                    bundle.putString(key, (String) value);
+                }
+            }
+        }
+
+        return bundle;
+    }
+
+    private static JSONObject toJsonObject(Bundle bundle) {
+        if (bundle == null) {
+            Log.v(TAG, "No extra information in intent bundle");
+            return new JSONObject();
+        }
+
+        JSONObject jsonObject = new JSONObject();
+
+        Set<String> keys = bundle.keySet();
+        for (String key: keys) {
+            Object value = bundle.get(key);
+            try {
+                jsonObject.put(key, wrapObject(value));
+            } catch (JSONException e) {
+                Log.e(TAG, String.format("Unable to convert bundle key '%s' to JSON", key), e);
+            }
+        }
+
+        return jsonObject;
+    }
+
     /**
+     * Wraps the given object if necessary.
+     * Copied from https://android.googlesource.com/platform/libcore/+/master/json/src/main/java/org/json/JSONObject.java
      *
+     * <p>If the object is null or , returns {@link JSONObject#NULL}.
+     * If the object is a {@code JSONArray} or {@code JSONObject}, no wrapping is necessary.
+     * If the object is {@code NULL}, no wrapping is necessary.
+     * If the object is an array or {@code Collection}, returns an equivalent {@code JSONArray}.
+     * If the object is a {@code Map}, returns an equivalent {@code JSONObject}.
+     * If the object is a primitive wrapper type or {@code String}, returns the object.
+     * Otherwise if the object is from a {@code java} package, returns the result of {@code toString}.
+     * If wrapping fails, returns null.
      */
+    private static Object wrapObject(Object o) {
+        if (o == null) {
+            return JSONObject.NULL;
+        }
+        if (o instanceof JSONArray || o instanceof JSONObject) {
+            return o;
+        }
+        if (o.equals(JSONObject.NULL)) {
+            return o;
+        }
+        try {
+            if (o instanceof byte[]) {
+                // represent a byte array as a URL-safe Base64-encoded string
+                // documentation for Android Base64 utilities: https://developer.android.com/reference/android/util/Base64.html
+                return Base64.encodeToString((byte[])o, Base64.URL_SAFE | Base64.NO_PADDING | Base64.NO_WRAP);
+            } else if (o instanceof Collection) {
+                return new JSONArray((Collection) o);
+            } else if (o.getClass().isArray()) {
+                return arrayToJsonArray(o);
+            }
+            if (o instanceof Map) {
+                return new JSONObject((Map) o);
+            }
+            if (o instanceof Boolean ||
+                    o instanceof Byte ||
+                    o instanceof Character ||
+                    o instanceof Double ||
+                    o instanceof Float ||
+                    o instanceof Integer ||
+                    o instanceof Long ||
+                    o instanceof Short ||
+                    o instanceof String) {
+                return o;
+            }
+            if (o.getClass().getPackage().getName().startsWith("java.")) {
+                return o.toString();
+            }
+        } catch (Exception ignored) {
+        }
+        return null;
+    }
+
+    /**
+     * Creates a new {@code JSONArray} with values from the given primitive array.
+     * Partially copied from https://android.googlesource.com/platform/libcore/+/master/json/src/main/java/org/json/JSONArray.java
+     */
+    private static JSONArray arrayToJsonArray(Object array) throws JSONException {
+        if (!array.getClass().isArray()) {
+            throw new JSONException("Not a primitive array: " + array.getClass());
+        }
+        final int length = Array.getLength(array);
+        JSONArray jsonArray = new JSONArray();
+        for (int i = 0; i < length; ++i) {
+            jsonArray.put(wrapObject(Array.get(array, i)));
+        }
+        return jsonArray;
+    }
+
     @Override
     public void onDestroy() {
         // deregister receiver
@@ -199,11 +320,11 @@ public class CDVBroadcaster extends CordovaPlugin {
         receiverMap.clear();
 
         super.onDestroy();
-
     }
 
     @TargetApi(Build.VERSION_CODES.KITKAT)
     private void sendJavascript(final String javascript) {
+        // TODO: return result using `context.sendPluginResult` instead of sending JavaScript over WebView
         webView.getView().post(new Runnable() {
            @Override
            public void run() {
