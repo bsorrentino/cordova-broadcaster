@@ -22,30 +22,30 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * This class echoes a string called from JavaScript.
+ * This plugin allows access to native Android broadcasts from JavaScript.
  */
 public class CDVBroadcaster extends CordovaPlugin {
 
     private static String TAG =  CDVBroadcaster.class.getSimpleName();
 
-    public static final String EVENTNAME_ERROR = "event name null or empty.";
+    private static final String EVENT_NAME_ERROR = "event name null or empty.";
 
-    java.util.Map<String,BroadcastReceiver> receiverMap =
+    private java.util.Map<String,BroadcastReceiver> receiverMap =
                     new java.util.HashMap<String,BroadcastReceiver>(10);
 
     /**
-     *
-     * @param eventName
-     * @param eventData
+     * Fire JavaScript event.
+     * @param eventName name of event to trigger.
+     * @param eventData data for event.
      * @throws JSONException
      */
-    protected void fireEvent( final String eventName, final Object eventData) throws JSONException {
+    private void fireEvent(final String eventName, final Object eventData) throws JSONException {
 
-        String method = null;
+        String method;
         if( eventData != null ) {
             final String data = String.valueOf(eventData);
             if (!(eventData instanceof JSONObject)) {
-                final JSONObject json = new JSONObject(data); // CHECK IF VALID
+                new JSONObject(data); // CHECK IF VALID
             }
             method = String.format("window.broadcaster.fireEvent( '%s', %s );", eventName, data);
         }
@@ -55,15 +55,15 @@ public class CDVBroadcaster extends CordovaPlugin {
         sendJavascript(method);
     }
 
-    protected void registerReceiver(BroadcastReceiver receiver, IntentFilter filter) {
+    private void registerReceiver(BroadcastReceiver receiver, IntentFilter filter) {
         getContext().registerReceiver(receiver, filter);
     }
 
-    protected void unregisterReceiver(BroadcastReceiver receiver) {
+    private void unregisterReceiver(BroadcastReceiver receiver) {
         getContext().unregisterReceiver(receiver);
     }
 
-    protected void sendBroadcast(Intent intent) {
+    private void sendBroadcast(Intent intent) {
         getContext().sendBroadcast(intent);
     }
 
@@ -103,7 +103,7 @@ public class CDVBroadcaster extends CordovaPlugin {
      * @param action          The action to execute.
      * @param args            The exec() arguments.
      * @param callbackContext The callback context used when calling back into JavaScript.
-     * @return
+     * @return true if an action was executed, false if not.
      * @throws JSONException
      */
     @Override
@@ -112,7 +112,7 @@ public class CDVBroadcaster extends CordovaPlugin {
 
             final String eventName = args.getString(0);
             if( eventName==null || eventName.isEmpty() ) {
-                callbackContext.error(EVENTNAME_ERROR);
+                callbackContext.error(EVENT_NAME_ERROR);
 
             }
             final JSONObject eventData = args.getJSONObject(1);
@@ -131,7 +131,7 @@ public class CDVBroadcaster extends CordovaPlugin {
 
             final String eventName = args.getString(0);
             if (eventName == null || eventName.isEmpty()) {
-                callbackContext.error(EVENTNAME_ERROR);
+                callbackContext.error(EVENT_NAME_ERROR);
                 return false;
             }
             if (!receiverMap.containsKey(eventName)) {
@@ -161,7 +161,7 @@ public class CDVBroadcaster extends CordovaPlugin {
 
             final String eventName = args.getString(0);
             if (eventName == null || eventName.isEmpty()) {
-                callbackContext.error(EVENTNAME_ERROR);
+                callbackContext.error(EVENT_NAME_ERROR);
                 return false;
             }
 
@@ -319,9 +319,6 @@ public class CDVBroadcaster extends CordovaPlugin {
         return new String(hexChars);
     }
 
-    /**
-     *
-     */
     @Override
     public void onDestroy() {
         // deregister receiver
@@ -336,6 +333,7 @@ public class CDVBroadcaster extends CordovaPlugin {
 
     @TargetApi(Build.VERSION_CODES.KITKAT)
     private void sendJavascript(final String javascript) {
+        // TODO: return result using `context.sendPluginResult` instead of sending JavaScript over WebView
         webView.getView().post(new Runnable() {
            @Override
            public void run() {
