@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Base64;
 import android.util.Log;
 
 import org.apache.cordova.CallbackContext;
@@ -263,7 +264,9 @@ public class CDVBroadcaster extends CordovaPlugin {
         }
         try {
             if (o instanceof byte[]) {
-                return bytesToHex((byte[])o);
+                // represent a byte array as a URL-safe Base64-encoded string
+                // documentation for Android Base64 utilities: https://developer.android.com/reference/android/util/Base64.html
+                return Base64.encodeToString((byte[])o, Base64.URL_SAFE | Base64.NO_PADDING | Base64.NO_WRAP);
             } else if (o instanceof Collection) {
                 return new JSONArray((Collection) o);
             } else if (o.getClass().isArray()) {
@@ -305,18 +308,6 @@ public class CDVBroadcaster extends CordovaPlugin {
             jsonArray.put(wrapObject(Array.get(array, i)));
         }
         return jsonArray;
-    }
-
-    // reference: http://stackoverflow.com/a/9855338
-    final private static char[] hexArray = "0123456789ABCDEF".toCharArray();
-    private static String bytesToHex(byte[] bytes) {
-        char[] hexChars = new char[bytes.length * 2];
-        for ( int j = 0; j < bytes.length; j++ ) {
-            int v = bytes[j] & 0xFF;
-            hexChars[j * 2] = hexArray[v >>> 4];
-            hexChars[j * 2 + 1] = hexArray[v & 0x0F];
-        }
-        return new String(hexChars);
     }
 
     @Override
