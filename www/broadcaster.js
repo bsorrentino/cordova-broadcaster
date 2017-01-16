@@ -36,7 +36,7 @@ module.exports = {
            me._channels[eventname] = channel.create(eventname);
            me._channels[eventname].subscribe(f);
          }, function(err)  {
-           console.log( "ERROR addEventListener: " + err)
+           console.log( "ERROR addEventListener: ", err)
          }, "broadcaster", "addEventListener", [ eventname ]);
      }
      else {
@@ -49,7 +49,7 @@ module.exports = {
         exec( function() {
           me._channels[eventname].unsubscribe(f);
         }, function(err)  {
-          console.log( "ERROR removeEventListener: " + err)
+          console.log( "ERROR removeEventListener: ", err)
         }, "broadcaster", "removeEventListener", [ eventname ]);
      }
   }
