@@ -22,13 +22,5 @@
         },
         "is_top_level": true,
         "variables": {}
-    },
-    "cordova-plugin-broadcaster": {
-        "source": {
-            "type": "local",
-            "path": "../broadcaster"
-        },
-        "is_top_level": true,
-        "variables": {}
     }
 }

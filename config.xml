@@ -20,6 +20,7 @@
     <allow-intent href="geo:*" />
     <platform name="android">
         <allow-intent href="market:*" />
+        <hook type="after_plugin_install" src="scripts/android_after_plugin_installed.js" />
     </platform>
     <platform name="ios">
         <allow-intent href="itms:*" />
