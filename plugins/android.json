@@ -7,9 +7,6 @@
         "files": {}
     },
     "installed_plugins": {
-        "cordova-plugin-broadcaster": {
-            "PACKAGE_NAME": "org.bsc.broadcasterApp"
-        },
         "cordova-plugin-console": {
             "PACKAGE_NAME": "org.bsc.broadcasterApp"
         },

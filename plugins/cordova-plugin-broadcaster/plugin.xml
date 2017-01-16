@@ -1,0 +1,35 @@
+<?xml version='1.0' encoding='utf-8'?>
+<plugin id="cordova-plugin-broadcaster"
+        version="2.0.7"
+        xmlns="http://apache.org/cordova/ns/plugins/1.0"
+        xmlns:android="http://schemas.android.com/apk/res/android">
+
+   <engines>
+      <engine name="cordova" version=">=3.9.1" /><!-- Needs cordova/urlutil -->
+    </engines>
+
+  <name>broadcaster</name>
+  <description>Allow send message from Javascript to Native</description>
+  <js-module name="broadcaster" src="www/broadcaster.js">
+    <clobbers target="broadcaster" />
+  </js-module>
+  <platform name="android">
+    <config-file parent="/*" target="res/xml/config.xml">
+      <feature name="broadcaster">
+        <param name="android-package" value="org.bsc.cordova.CDVBroadcaster" />
+      </feature>
+    </config-file>
+    <config-file parent="/*" target="AndroidManifest.xml" />
+    <source-file src="src/android/CDVBroadcaster.java" target-dir="src/org/bsc/cordova" />
+    <framework src="com.android.support:support-v4:+" />
+  </platform>
+  <platform name="ios">
+    <config-file parent="/*" target="config.xml">
+      <feature name="broadcaster">
+        <param name="ios-package" value="CDVBroadcaster" />
+      </feature>
+    </config-file>
+    <header-file src="src/ios/CDVBroadcaster.h" />
+    <source-file src="src/ios/CDVBroadcaster.m" />
+  </platform>
+</plugin>
