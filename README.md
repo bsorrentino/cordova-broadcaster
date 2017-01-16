@@ -43,10 +43,28 @@ USAGE:
 
 ### IOS
 
+#### Objective-C
+
 ```Objective-C
 [[NSNotificationCenter defaultCenter] postNotificationName:@"didShow"
                                                     object:nil
                                                   userInfo:@{ @"data":@"test"}];
+```
+
+#### Swift 2.2
+
+```swift
+let nc = NSNotificationCenter.defaultCenter()
+nc.postNotificationName("didShow",
+                        object: nil,
+                        userInfo: ["data":"test"])
+```
+
+#### Swift 3.0
+
+```swift
+let nc = NSNotificationCenter.default
+nc.post(name:"didShow", object: nil, userInfo: ["data":"test"])
 ```
 
 ### ANDROID
@@ -73,28 +91,58 @@ LocalBroadcastManager.getInstance(this).sendBroadcastSync(intent);
 
 ### IOS
 
+#### Objective-C
+
 ```Objective-C
 [[NSNotificationCenter defaultCenter] addObserverForName:@"test.event"
                                                   object:nil
                                                    queue:[NSOperationQueue mainQueue]
-                                              usingBlock:^(NSNotification *note) {
-
-                                                      NSLog(@"Handled 'test.event' [%@]", note.userInfo[@"item"]);
-
+                                              usingBlock:^(NSNotification *notification) {
+                                                      NSLog(@"Handled 'test.event' [%@]", notification.userInfo[@"item"]);
                                                     }];
 ```
+
+#### Swift 2.2
+
+```swift
+let nc = NSNotificationCenter.defaultCenter()
+nc.addObserverForName("test.event",
+               object: nil,
+               queue:nil ) {
+  notification in
+    print( "\(notification.userInfo)")
+}
+
+```
+
+#### Swift 3.0
+
+```swift
+let nc = NotificationCenter.default
+nc.addObserver(forName:Notification.Name(rawValue:"test.event"),
+               object:nil, queue:nil) {
+  notification in
+  print( "\(notification.userInfo)")
+}
+```
+
 
 ### ANDROID
 
 ```Java
 final BroadcastReceiver receiver = new BroadcastReceiver() {
-  @Override
-  public void onReceive(Context context, Intent intent) {
-          final JSONObject data = new JSONObject( intent.getBundle().getString("userdata"));
+    @Override
+    public void onReceive(Context context, Intent intent) {
+        try {
+            final JSONObject data = new JSONObject( intent.getExtras().getString("userdata"));
 
-          Log.d("CDVBroadcaster",
-            String.format("Naptive event [%s] received with data [%s]", intent.getAction(), data.toString()));
-  }
+            Log.d("CDVBroadcaster",
+                    String.format("Native event [%s] received with data [%s]", intent.getAction(), String.valueOf(data)));
+
+        } catch (JSONException e) {
+           throw new RuntimeException(e);
+        }
+    }
 };
 
 LocalBroadcastManager.getInstance(this)
