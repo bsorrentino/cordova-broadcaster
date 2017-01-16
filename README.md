@@ -1,8 +1,10 @@
 Cordova Broadcaster
 =====================
 
-Cordova Plugin to allow message exchange between javascript and native (and viceversa).
-From *2.0.1* deployed as [NPM package](https://www.npmjs.com/package/cordova-plugin-broadcaster)  
+Cordova Plugin to allow message exchange between javascript and native (and viceversa). 
+
+[![npm](https://img.shields.io/npm/v/cordova-plugin-broadcaster.svg)](https://www.npmjs.com/package/cordova-plugin-broadcaster)
+
 
 IOS
 ===
