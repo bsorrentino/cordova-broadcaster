@@ -1,25 +1,26 @@
-Cordova Broadcaster
-=====================
+# Cordova Broadcaster
 
-Cordova Plugin to allow message exchange between javascript and native (and viceversa). 
+Cordova Plugin to allow message exchange between javascript and native (and viceversa).
 
 [![npm](https://img.shields.io/npm/v/cordova-plugin-broadcaster.svg)](https://www.npmjs.com/package/cordova-plugin-broadcaster)
 
 
-IOS
-===
+## Ingredient Technologies
 
-> Providing bridge to **[NotificationCenter](https://developer.apple.com/library/mac/documentation/Cocoa/Reference/Foundation/Classes/NSNotificationCenter_Class/index.html#//apple_ref/occ/instm/NSNotificationCenter/addObserverForName%3aobject%3aqueue%3ausingBlock%3a)**
+Broadcaster plugin providing bridge for the following native technologies:
+
+  target OS | Native Technology
+ ----|----
+ IOS | **[NotificationCenter](https://developer.apple.com/library/mac/documentation/Cocoa/Reference/Foundation/Classes/NSNotificationCenter_Class/index.html#//apple_ref/occ/instm/NSNotificationCenter/addObserverForName%3aobject%3aqueue%3ausingBlock%3a)**
+Android | **[LocalBroadcastManager](http://developer.android.com/reference/android/support/v4/content/LocalBroadcastManager.html)**
+
+## News
+
+ Jan 28, 2017 | such plugin has been added to [ionic-native](https://ionicframework.com/docs/v2/native/) distribution | `How to` is available   [here](https://ionicframework.com/docs/v2/native/broadcaster/)
+ ---- | ---- | ----
 
 
-Android
-=======
-
-> Providing bridge to **[LocalBroadcastManager](http://developer.android.com/reference/android/support/v4/content/LocalBroadcastManager.html)**
-
-
-INSTALL
-========
+## Installation
 
 ```javascript
 $ cordova create <PATH> [ID [NAME [CONFIG]]] [options]
@@ -28,13 +29,11 @@ $ cordova platform add [ios|android]
 $ cordova plugin add cordova-plugin-broadcaster
 ```
 
-USAGE:
-======
+## Usage:
 
-## From Native to Javascript
+### From Native to Javascript
 
-### Javascript
-
+#### Javascript
 ```javascript
     console.log( "register didShow received!" );
     window.broadcaster.addEventListener( "didShow", function( e ) {
@@ -52,23 +51,18 @@ USAGE:
                                                     object:nil
                                                   userInfo:@{ @"data":@"test"}];
 ```
-
 #### Swift 2.2
-
 ```swift
 let nc = NSNotificationCenter.defaultCenter()
 nc.postNotificationName("didShow",
                         object: nil,
                         userInfo: ["data":"test"])
 ```
-
 #### Swift 3.0
-
 ```swift
 let nc = NSNotificationCenter.default
 nc.post(name:"didShow", object: nil, userInfo: ["data":"test"])
 ```
-
 ### ANDROID
 
 ```Java
@@ -80,6 +74,7 @@ intent.putExtras( b);
 
 LocalBroadcastManager.getInstance(this).sendBroadcastSync(intent);
 ```
+
 
 ## From Javascript to Native
 
