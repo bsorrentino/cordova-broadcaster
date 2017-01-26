@@ -7,7 +7,7 @@ Cordova Plugin to allow message exchange between javascript and native (and vice
 
 ## Ingredient Technologies
 
-Broadcaster plugin providing bridge for the following native technology:
+Broadcaster plugin providing bridge for the following native technologies:
 
   target OS | Native Technology
  ----|----
@@ -16,7 +16,7 @@ Android | **[LocalBroadcastManager](http://developer.android.com/reference/andro
 
 ## News
 
- Jan 28, 2017 | such plugin has been added to [ionic-native](https://ionicframework.com/docs/v2/native/) distribution | How to is available   [here](https://ionicframework.com/docs/v2/native/broadcaster/)
+ Jan 28, 2017 | such plugin has been added to [ionic-native](https://ionicframework.com/docs/v2/native/) distribution | `How to` is available   [here](https://ionicframework.com/docs/v2/native/broadcaster/)
  ---- | ---- | ----
 
 
