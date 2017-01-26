@@ -4,7 +4,6 @@ Cordova Plugin to allow message exchange between javascript and native (and vice
 
 [![npm](https://img.shields.io/npm/v/cordova-plugin-broadcaster.svg)](https://www.npmjs.com/package/cordova-plugin-broadcaster)
 
-
 ## Ingredient Technologies
 
 Broadcaster plugin providing bridge for the following native technologies:
