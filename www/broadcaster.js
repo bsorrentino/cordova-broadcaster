@@ -42,6 +42,7 @@ module.exports = {
      else {
        this._channels[eventname].subscribe(f);
      }
+     return f;
   },
   removeEventListener: function(eventname, f) {
      if (eventname in this._channels) {
