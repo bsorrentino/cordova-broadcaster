@@ -39,18 +39,25 @@ public class CDVBroadcaster extends CordovaPlugin {
      */
     protected void fireEvent( final String eventName, final Object jsonUserData) throws JSONException {
 
-        String method = null; ;
+        final String method ;
         if( jsonUserData != null ) {
             final String data = String.valueOf(jsonUserData);
             if (!(jsonUserData instanceof JSONObject)) {
                 final JSONObject json = new JSONObject(data); // CHECK IF VALID
             }
-            method = String.format("window.broadcaster.fireEvent( '%s', %s );", eventName, data);
+            method = String.format("javascript:window.broadcaster.fireEvent( '%s', %s );", eventName, data);
         }
         else {
-            method = String.format("window.broadcaster.fireEvent( '%s', {} );", eventName);
+            method = String.format("javascript:window.broadcaster.fireEvent( '%s', {} );", eventName);
         }
-        sendJavascript(method);
+
+        cordova.getActivity().runOnUiThread( new Runnable() {
+
+            @Override
+            public void run() {
+                CDVBroadcaster.this.webView.loadUrl(method);
+            }
+        });
     }
 
     protected void registerReceiver(android.content.BroadcastReceiver receiver, android.content.IntentFilter filter) {
@@ -68,13 +75,14 @@ public class CDVBroadcaster extends CordovaPlugin {
     @Override
     public Object onMessage(String id, Object data) {
 
-        try {
-            fireEvent( id, data );
-        } catch (JSONException e) {
-            Log.e(TAG, String.format("userdata [%s] for event [%s] is not a valid json object!", data, id));
-            return Boolean.FALSE;
+        if( receiverMap.containsKey(id) ) {
+            try {
+                fireEvent( id, data );
+            } catch (JSONException e) {
+                Log.e(TAG, String.format("userdata [%s] for event [%s] is not a valid json object!", data, id));
+            }
         }
-        return Boolean.TRUE;
+        return super.onMessage( id, data );
     }
 
     private void fireNativeEvent( final String eventName, JSONObject userData ) {
@@ -172,13 +180,10 @@ public class CDVBroadcaster extends CordovaPlugin {
                 return false;
             }
 
-            BroadcastReceiver r = receiverMap.remove(eventName);
+            final BroadcastReceiver r = receiverMap.remove(eventName);
 
             if (r != null) {
-
                 unregisterReceiver(r);
-
-
             }
             callbackContext.success();
             return true;
@@ -202,17 +207,4 @@ public class CDVBroadcaster extends CordovaPlugin {
 
     }
 
-    @TargetApi(Build.VERSION_CODES.KITKAT)
-    private void sendJavascript(final String javascript) {
-        webView.getView().post(new Runnable() {
-           @Override
-           public void run() {
-               if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                    webView.sendJavascript(javascript);
-                   } else {
-                    webView.loadUrl("javascript:".concat(javascript));
-                    }
-               }
-            });
-    }
 }
