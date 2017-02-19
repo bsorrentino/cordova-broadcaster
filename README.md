@@ -1,5 +1,7 @@
 # Cordova Broadcaster
 
+[![Join the chat at https://gitter.im/cordova-broadcaster/Lobby](https://badges.gitter.im/cordova-broadcaster/Lobby.svg)](https://gitter.im/cordova-broadcaster/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 Cordova Plugin to allow message exchange between javascript and native (and viceversa).
 
 [![npm](https://img.shields.io/npm/v/cordova-plugin-broadcaster.svg)](https://www.npmjs.com/package/cordova-plugin-broadcaster)
