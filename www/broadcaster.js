@@ -3,7 +3,8 @@ var exec = require('cordova/exec');
 var channel = require('cordova/channel');
 
 function Broadcaster() {
-  console.log( "NEW BROADCASTER");
+  var _debug = false;
+  //console.log( "NEW BROADCASTER");
   this._channels = {};
 
   this.channelExists = function( c ) {
@@ -12,29 +13,28 @@ function Broadcaster() {
   }
 
   this.channelCreate = function( c ) {
-    console.log( "CHANNEL " + c + " CREATED! ");
+    if( _debug ) console.log( "CHANNEL " + c + " CREATED! ");
     this._channels[c] = channel.create(c);
   }
   this.channelSubscribe = function( c, f ) {
     var channel = this._channels[c];
     channel.subscribe(f);
-    console.log( "CHANNEL " + c + " SUBSCRIBED! " + channel.numHandlers);
+    if( _debug ) console.log( "CHANNEL " + c + " SUBSCRIBED! " + channel.numHandlers);
     return channel.numHandlers;
   }
   this.channelUnsubscribe = function( c, f ) {
     var channel = this._channels[c];
     channel.unsubscribe(f);
-    console.log( "CHANNEL " + c + " UNSUBSCRIBED! " + channel.numHandlers);
+    if( _debug ) console.log( "CHANNEL " + c + " UNSUBSCRIBED! " + channel.numHandlers);
     return channel.numHandlers;
   }
   this.channelFire = function( event ) {
-    console.log( "CHANNEL " + event.type + " FIRED! ");
+    if( _debug ) console.log( "CHANNEL " + event.type + " FIRED! ");
     this._channels[event.type].fire(event);
   }
   this.channelDelete = function( c ) {
     delete this._channels[c];
-    console.log( "CHANNEL " + c + " DELETED! ");
-
+    if( _debug ) console.log( "CHANNEL " + c + " DELETED! ");
   }
 
 }
