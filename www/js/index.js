@@ -51,15 +51,7 @@ var app = {
         }
 
         console.log('Received Event: ' + id);
-        this.broadcasterInit();
-    },
-    broadcasterInit: function() {
-
-            console.log( "register didShow listener!" );
-            window.broadcaster.addEventListener( "didShow", function( e ) {
-                console.log( "didShow event received! " + JSON.stringify(e) );
-            });
-        }
+    }
 };
 
 app.initialize();
