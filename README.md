@@ -37,10 +37,13 @@ $ cordova plugin add cordova-plugin-broadcaster
 #### Javascript
 ```javascript
     console.log( "register didShow received!" );
-    var listener = window.broadcaster.addEventListener( "didShow", function( e ) {
-                //log: didShow received! userInfo: {"data":"test"}
-                console.log( "didShow received! userInfo: " + JSON.stringify(e)  );
-    });
+  
+    var listener = function( e ) {
+      //log: didShow received! userInfo: {"data":"test"}
+      console.log( "didShow received! userInfo: " + JSON.stringify(e)  );
+    }
+
+    window.broadcaster.addEventListener( "didShow", listener);
 ```
 
 ### IOS
