@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='utf-8'?>
 <plugin id="cordova-plugin-broadcaster"
-        version="2.2.1"
+        version="2.3.0"
         xmlns="http://apache.org/cordova/ns/plugins/1.0"
         xmlns:android="http://schemas.android.com/apk/res/android">
 
@@ -13,6 +13,20 @@
   <js-module name="broadcaster" src="www/broadcaster.js">
     <clobbers target="broadcaster" />
   </js-module>
+  <!-- browser -->
+  <platform name="browser">
+      <config-file parent="/*" target="config.xml">
+        <feature name="broadcaster">
+          <param name="browser-package" value="broadcaster" />
+      </feature>
+      </config-file>
+      <!--
+      <js-module src="src/browser/PKBarcodeFormatAztecProxy.js" name="PKBarcodeFormatAztecProxy">
+          <runs />
+      </js-module>
+      -->
+  </platform>
+
   <platform name="android">
     <config-file parent="/*" target="res/xml/config.xml">
       <feature name="broadcaster">
