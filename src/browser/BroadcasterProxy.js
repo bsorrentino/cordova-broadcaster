@@ -1,20 +1,32 @@
 var browser = require('cordova/platform');
 
-module.exports = {
+  /**
+   * 
+   * to simulate native event use 'broadcaster.fireEvent( event, data );'
+   */
+  module.exports = {
 
-  fireNativeEvent = function(eventname, data, success, error) {
-    console.log( "fileNativeEvent", eventname);
+  /**
+   * opts: [eventname:string, data:any]
+   */
+   fireNativeEvent:function(success, error, opts) {
+    var event = new CustomEvent(opts[0], { detail: opts[1] } );
+    if( document.dispatchEvent( event ) ) success({});
+  },
+  /**
+   * opts: [eventname:string]
+   * 
+   */
+  addEventListener:function (success, error, opts ) {
     success({});
   },
-  addEventListener = function (eventname,f) {
-    console.log( "addEventListener", eventname);
-    success({});
-  },
-  removeEventListener = function(eventname, f) {
-    console.log( "removeEventListener", eventname);
+  /**
+   * opts: [eventname]
+   */
+  removeEventListener:function(success, error, opts) {
     success({});
   }
 
 }
 
-require("cordova/exec/proxy").add("Broadcaster", module.exports);
+require("cordova/exec/proxy").add("broadcaster", module.exports);
