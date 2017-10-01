@@ -1,9 +1,8 @@
-<?xml version='1.0' encoding='utf-8'?>
+<?xml version="1.0" encoding="UTF-8"?>
 <plugin id="cordova-plugin-broadcaster"
-        version="2.2.1"
+        version="2.3.0"
         xmlns="http://apache.org/cordova/ns/plugins/1.0"
         xmlns:android="http://schemas.android.com/apk/res/android">
-
    <engines>
       <engine name="cordova" version=">=3.9.1" /><!-- Needs cordova/urlutil -->
     </engines>
@@ -13,6 +12,18 @@
   <js-module name="broadcaster" src="www/broadcaster.js">
     <clobbers target="broadcaster" />
   </js-module>
+  <!-- browser -->
+  <platform name="browser">
+      <config-file parent="/*" target="config.xml">
+        <feature name="broadcaster">
+          <param name="browser-package" value="broadcaster" />
+      </feature>
+      </config-file>
+      <js-module src="src/browser/BroadcasterProxy.js" name="broadcasterProxy">
+          <runs />
+      </js-module>
+  </platform>
+
   <platform name="android">
     <config-file parent="/*" target="res/xml/config.xml">
       <feature name="broadcaster">
