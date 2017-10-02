@@ -19,15 +19,11 @@
     "cordova-ios"
   ],
   "engines": {
-      "cordovaDependencies": {
-        "2.2.1": {
-          "cordova": ">3.9.0"
-        },
-        "2.3.0": {
-          "cordova": ">4.0.0"
-        }
+      "cordovaDependencies": { 
+        "2.2.1": { "cordova": ">3.9.0" },
+        "2.3.0": { "cordova": ">4.0.0" }
       }
-    },
+  },
   "author": "bsorrentino",
   "license": "MIT",
   "bugs": {
