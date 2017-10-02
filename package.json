@@ -1,6 +1,6 @@
 {
   "name": "cordova-plugin-broadcaster",
-  "version": "2.2.1",
+  "version": "2.3.0",
   "description": "Allow send message from Javascript to Native",
   "cordova": {
     "id": "cordova-plugin-broadcaster",
@@ -18,12 +18,12 @@
     "cordova-android",
     "cordova-ios"
   ],
-  "engines": [
-    {
-      "name": "cordova",
-      "version": ">=3.9.1"
-    }
-  ],
+  "engines": {
+      "cordovaDependencies": { 
+        "2.2.1": { "cordova": ">3.9.0" },
+        "2.3.0": { "cordova": ">4.0.0" }
+      }
+  },
   "author": "bsorrentino",
   "license": "MIT",
   "bugs": {

@@ -46,28 +46,7 @@ $ cordova plugin add cordova-plugin-broadcaster
     window.broadcaster.addEventListener( "didShow", listener);
 ```
 
-### IOS
-
-#### Objective-C
-
-```Objective-C
-[[NSNotificationCenter defaultCenter] postNotificationName:@"didShow"
-                                                    object:nil
-                                                  userInfo:@{ @"data":@"test"}];
-```
-#### Swift 2.2
-```swift
-let nc = NSNotificationCenter.defaultCenter()
-nc.postNotificationName("didShow",
-                        object: nil,
-                        userInfo: ["data":"test"])
-```
-#### Swift 3.0
-```swift
-let nc = NSNotificationCenter.default
-nc.post(name:"didShow", object: nil, userInfo: ["data":"test"])
-```
-### ANDROID
+#### ANDROID
 
 ```Java
 final Intent intent = new Intent("didShow");
@@ -79,10 +58,40 @@ intent.putExtras( b);
 LocalBroadcastManager.getInstance(this).sendBroadcastSync(intent);
 ```
 
+#### IOS
 
-## From Javascript to Native
+##### Objective-C
+```Objective-C
+[[NSNotificationCenter defaultCenter] postNotificationName:@"didShow"
+                                                    object:nil
+                                                  userInfo:@{ @"data":@"test"}];
+```
 
-### Javascript
+##### Swift 3.0
+```swift
+let nc = NSNotificationCenter.default
+nc.post(name:"didShow", object: nil, userInfo: ["data":"test"])
+```
+
+##### Swift 2.2
+```swift
+let nc = NSNotificationCenter.defaultCenter()
+nc.postNotificationName("didShow",
+                        object: nil,
+                        userInfo: ["data":"test"])
+```
+
+#### BROWSER
+
+```javascript
+
+let event = new CustomEvent("didShow", { detail: { data:"test"} } );
+document.dispatchEvent( event )
+
+```
+### From Javascript to Native
+
+#### Javascript
 
 ```javascript
   window.broadcaster.fireNativeEvent( "test.event", { item:'test data' }, function() {
@@ -90,45 +99,7 @@ LocalBroadcastManager.getInstance(this).sendBroadcastSync(intent);
     } );
  ```
 
-### IOS
-
-#### Objective-C
-
-```Objective-C
-[[NSNotificationCenter defaultCenter] addObserverForName:@"test.event"
-                                                  object:nil
-                                                   queue:[NSOperationQueue mainQueue]
-                                              usingBlock:^(NSNotification *notification) {
-                                                      NSLog(@"Handled 'test.event' [%@]", notification.userInfo[@"item"]);
-                                                    }];
-```
-
-#### Swift 2.2
-
-```swift
-let nc = NSNotificationCenter.defaultCenter()
-nc.addObserverForName("test.event",
-               object: nil,
-               queue:nil ) {
-  notification in
-    print( "\(notification.userInfo)")
-}
-
-```
-
-#### Swift 3.0
-
-```swift
-let nc = NotificationCenter.default
-nc.addObserver(forName:Notification.Name(rawValue:"test.event"),
-               object:nil, queue:nil) {
-  notification in
-  print( "\(notification.userInfo)")
-}
-```
-
-
-### ANDROID
+#### ANDROID
 
 ```Java
 final BroadcastReceiver receiver = new BroadcastReceiver() {
@@ -149,4 +120,50 @@ final BroadcastReceiver receiver = new BroadcastReceiver() {
 LocalBroadcastManager.getInstance(this)
             .registerReceiver(receiver, new IntentFilter("test.event"));
 }
+```
+
+#### IOS
+
+##### Objective-C
+
+```Objective-C
+[[NSNotificationCenter defaultCenter] addObserverForName:@"test.event"
+                                                  object:nil
+                                                   queue:[NSOperationQueue mainQueue]
+                                              usingBlock:^(NSNotification *notification) {
+                                                      NSLog(@"Handled 'test.event' [%@]", notification.userInfo[@"item"]);
+                                                    }];
+```
+
+##### Swift 3.0
+
+```swift
+let nc = NotificationCenter.default
+nc.addObserver(forName:Notification.Name(rawValue:"test.event"),
+               object:nil, queue:nil) {
+  notification in
+  print( "\(notification.userInfo)")
+}
+```
+
+##### Swift 2.2
+
+```swift
+let nc = NSNotificationCenter.defaultCenter()
+nc.addObserverForName("test.event",
+               object: nil,
+               queue:nil ) {
+  notification in
+    print( "\(notification.userInfo)")
+}
+
+```
+#### BROWSER
+
+```javascript
+
+document.addEventListener( "test.event", ( ev:Event ) => {
+  console.log( "test event", ev.detail );
+});
+
 ```
