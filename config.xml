@@ -26,6 +26,5 @@
         <allow-intent href="itms:*" />
         <allow-intent href="itms-apps:*" />
     </platform>
-    <plugin name="cordova-plugin-broadcaster" spec="../plugin" />
     <plugin name="org.bsc.broadcasterTest" spec="../test" />
 </widget>

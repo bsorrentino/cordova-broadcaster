@@ -1,21 +1,21 @@
 {
-    "prepare_queue": {
-        "installed": [],
-        "uninstalled": []
+  "prepare_queue": {
+    "installed": [],
+    "uninstalled": []
+  },
+  "config_munge": {
+    "files": {}
+  },
+  "installed_plugins": {
+    "cordova-plugin-console": {
+      "PACKAGE_NAME": "org.bsc.broadcasterApp"
     },
-    "config_munge": {
-        "files": {}
+    "cordova-plugin-device": {
+      "PACKAGE_NAME": "org.bsc.broadcasterApp"
     },
-    "installed_plugins": {
-        "cordova-plugin-console": {
-            "PACKAGE_NAME": "org.bsc.broadcasterApp"
-        },
-        "cordova-plugin-device": {
-            "PACKAGE_NAME": "org.bsc.broadcasterApp"
-        },
-        "cordova-plugin-whitelist": {
-            "PACKAGE_NAME": "org.bsc.broadcasterApp"
-        }
-    },
-    "dependent_plugins": {}
+    "cordova-plugin-whitelist": {
+      "PACKAGE_NAME": "org.bsc.broadcasterApp"
+    }
+  },
+  "dependent_plugins": {}
 }

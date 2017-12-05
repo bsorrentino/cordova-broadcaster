@@ -4,3 +4,7 @@ build/
 gen/
 .gradle/
 platforms/
+node_modules/
+.idea/
+
+
