@@ -55,19 +55,13 @@ public class MainActivity extends CordovaActivity
         final BroadcastReceiver receiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                try {
-                    final JSONObject data = new JSONObject( intent.getExtras().getString("userdata"));
+                    final Bundle extras = intent.getExtras();
 
 
                     Log.d("CDVBroadcaster",
-                            String.format("Native event [%s] received with data [%s]", intent.getAction(), String.valueOf(data)));
+                            String.format("Native event [%s] received with data [%s]", intent.getAction(), String.valueOf(extras)));
 
-                } catch (JSONException e) {
-                   throw new RuntimeException(e);
-                }
-                finally {
                     sendJSMessage();
-                }
             }
         };
 
@@ -79,7 +73,8 @@ public class MainActivity extends CordovaActivity
         final Intent intent = new Intent("didShow");
 
         Bundle b = new Bundle();
-        b.putString( "userdata", "{ data: 'test'}" );
+        b.putString( "data", "test");
+        b.putBoolean( "valid", true );
         intent.putExtras( b);
 
         LocalBroadcastManager.getInstance(this).sendBroadcastSync(intent);
