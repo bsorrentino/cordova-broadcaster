@@ -33,7 +33,7 @@ module.exports = {
    * opts: [eventname]
    */
   removeEventListener:function(success, error, opts) {
-    document.removeventListener( opts[0], _handler )
+    document.removeEventListener( opts[0], _handler )
     success({});
   }
 
