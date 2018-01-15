@@ -5,7 +5,6 @@ Cordova Plugin to allow message exchange between javascript and native (and vice
 [![npm](https://img.shields.io/npm/v/cordova-plugin-broadcaster.svg)](https://www.npmjs.com/package/cordova-plugin-broadcaster) [![Join the chat at https://gitter.im/bsorrentino/cordova-broadcaster](https://badges.gitter.im/bsorrentino/cordova-broadcaster.svg)](https://gitter.im/bsorrentino/cordova-broadcaster?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 
-
 ## Ingredient Technologies
 
 Broadcaster plugin providing bridge for the following native technologies:
@@ -17,7 +16,10 @@ Android | **[LocalBroadcastManager](http://developer.android.com/reference/andro
 
 ## News
 
- Jan 28, 2017 | such plugin has been added to [ionic-native](https://ionicframework.com/docs/v2/native/) distribution | `How to` is available   [here](https://ionicframework.com/docs/v2/native/broadcaster/)
+Jan 16, 2018 | I've developed an ionic3 sample project using broadcaster https://github.com/bsorrentino/ionic-broadcaster-sample
+---- | ---- | ----
+
+Jan 28, 2017 | such plugin has been added to [ionic-native](https://ionicframework.com/docs/v2/native/) distribution | `How to` is available   [here](https://ionicframework.com/docs/v2/native/broadcaster/)
  ---- | ---- | ----
 
 
