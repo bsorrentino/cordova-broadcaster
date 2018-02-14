@@ -18,7 +18,7 @@ Android | **[LocalBroadcastManager](http://developer.android.com/reference/andro
   date |  infos | refs
 ---- | ---- | ----
 Jan 16, 2018 | I've developed a complete **ionic3** sample project using **broadcaster** | [ionic-broadcaster-sample](https://github.com/bsorrentino/ionic-broadcaster-sample)
-Jan 28, 2017 | such plugin has been added to [ionic-native](https://ionicframework.com/docs/v2/native/) distribution | `How to` is available   [here](https://ionicframework.com/docs/v2/native/broadcaster/)
+Jan 28, 2017 | such plugin has been added to [ionic-native](https://ionicframework.com/docs/v2/native/broadcaster/) distribution | **How to** is available   [here](https://ionicframework.com/docs/v2/native/broadcaster/)
 
 
 
