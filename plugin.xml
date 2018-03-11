@@ -32,7 +32,7 @@
     </config-file>
     <config-file parent="/*" target="AndroidManifest.xml" />
     <source-file src="src/android/CDVBroadcaster.java" target-dir="src/org/bsc/cordova" />
-    <framework src="com.android.support:support-v4:+" />
+    <framework src="com.android.support:support-v4:26+" />
   </platform>
   <platform name="ios">
     <config-file parent="/*" target="config.xml">
