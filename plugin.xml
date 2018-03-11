@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <plugin id="cordova-plugin-broadcaster"
-        version="3.0.1"
+        version="3.1.0"
         xmlns="http://apache.org/cordova/ns/plugins/1.0"
         xmlns:android="http://schemas.android.com/apk/res/android">
    <engines>
@@ -32,7 +32,7 @@
     </config-file>
     <config-file parent="/*" target="AndroidManifest.xml" />
     <source-file src="src/android/CDVBroadcaster.java" target-dir="src/org/bsc/cordova" />
-    <framework src="com.android.support:support-v4:+" />
+    <framework src="com.android.support:support-v4:26+" />
   </platform>
   <platform name="ios">
     <config-file parent="/*" target="config.xml">
