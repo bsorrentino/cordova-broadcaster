@@ -189,6 +189,9 @@ public class CDVBroadcaster extends CordovaPlugin {
      */
     @Override
     public void onDestroy() {
+
+        this.fireEvent( "beforeunload", null);
+
         // deregister receiver
         for( BroadcastReceiver r : receiverMap.values() ) {
                     unregisterReceiver(r);
