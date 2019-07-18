@@ -198,6 +198,6 @@ static inline void throwWithName( NSError *error, NSString* name )
  * Override method for onAppTerminate provided in CDVPlugin.h
  */
 - (void)onAppTerminate {
-    [self fireJsEvent:@"beforeunload" jsonData:@"{}" scheduledOnRunLoop:NO];
+    [self fireJsEvent:@"willterminate" jsonData:@"{}" scheduledOnRunLoop:NO];
 }
 @end
