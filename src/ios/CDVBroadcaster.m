@@ -19,7 +19,7 @@ static inline void throwWithName( NSError *error, NSString* name )
 @property (nonatomic,strong) NSMutableDictionary *observerMap;
 
 - (void)fireNativeEvent:(CDVInvokedUrlCommand*)command;
-- (void)fireEvent:(NSString *)eventName data:(NSDictionary*)data;
+- (void)fireEvent:(NSString *)eventName data:(NSDictionary*)data ;
 - (void)addEventListener:(CDVInvokedUrlCommand*)command;
 - (void)removeEventListener:(CDVInvokedUrlCommand*)command;
 
@@ -30,17 +30,33 @@ static inline void throwWithName( NSError *error, NSString* name )
 
 - (void)dealloc
 {
-    
+
     for ( id observer in self.observerMap) {
-    
+
         [[NSNotificationCenter defaultCenter] removeObserver:observer];
-        
+
     }
-    
+
     [_observerMap removeAllObjects];
-    
+
     _observerMap = nil;
-    
+
+}
+
+-(void)fireJsEvent:(NSString *)eventName jsonData:(NSString *)jsonDataString
+{
+    NSString *func =
+    [NSString stringWithFormat:@"window.broadcaster.fireEvent('%@', %@);", eventName, jsonDataString];
+
+    [self.commandDelegate evalJs:func];
+}
+
+-(void)fireJsEvent:(NSString *)eventName jsonData:(NSString *)jsonDataString scheduledOnRunLoop:(BOOL)scheduledOnRunLoop
+{
+    NSString *func =
+    [NSString stringWithFormat:@"window.broadcaster.fireEvent('%@', %@);", eventName, jsonDataString];
+
+    [self.commandDelegate evalJs:func scheduledOnRunLoop:scheduledOnRunLoop];
 }
 
 -(NSMutableDictionary *)observerMap
@@ -48,7 +64,7 @@ static inline void throwWithName( NSError *error, NSString* name )
     if (!_observerMap) {
         _observerMap = [[NSMutableDictionary alloc] initWithCapacity:100];
     }
-    
+
     return _observerMap;
 }
 
@@ -57,49 +73,42 @@ static inline void throwWithName( NSError *error, NSString* name )
     if (!self.commandDelegate ) {
         return;
     }
-    
+
     if (eventName == nil || [eventName length] == 0) {
-        
+
         @throw [NSException exceptionWithName:NSInvalidArgumentException
                                        reason:@"eventName is null or empty"
                                      userInfo:nil];
-
     }
-    
+
     NSString *jsonDataString = @"{}";
-    
+
     if( data  ) {
-        
+
         NSError *error;
         NSData *jsonData = [NSJSONSerialization dataWithJSONObject:data
                                                            options:(NSJSONWritingOptions)0
                                                              error:&error];
-        
-        if (! jsonData) {
 
+        if (! jsonData) {
             throwWithName(error, @"JSON Serialization exception");
             return;
-            
         }
-        
-        jsonDataString = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
-        
 
+        jsonDataString = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
     }
-    
-    NSString *func = [NSString stringWithFormat:@"window.broadcaster.fireEvent('%@', %@);", eventName, jsonDataString];
-    
-    [self.commandDelegate evalJs:func];
-    
-    
+
+    [self fireJsEvent:eventName jsonData:jsonDataString];
+
+
 }
 
 - (void)addEventListener:(CDVInvokedUrlCommand*)command
 {
     CDVPluginResult* pluginResult;
-    
+
     __block NSString* eventName = command.arguments[0];
-    
+
     if (eventName == nil || [eventName length] == 0) {
         pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"eventName is null or empty"];
         [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
@@ -107,27 +116,27 @@ static inline void throwWithName( NSError *error, NSString* name )
     }
 
     id observer = self.observerMap[eventName];
-    
+
     if (!observer) {
         __typeof(self) __weak weakSelf = self;
-        
+
         observer = [[NSNotificationCenter defaultCenter] addObserverForName:eventName
                                                                      object:nil
                                                                       queue:[NSOperationQueue mainQueue]
                                                                  usingBlock:^(NSNotification *note) {
-                                                                     
+
                                                                      __typeof(self) __strong strongSelf = weakSelf;
-                                                                     
+
                                                                      [strongSelf fireEvent:eventName data:note.userInfo];
-                                                                     
+
                                                                  }];
         [self.observerMap setObject:observer forKey:eventName];
     }
-    
+
     pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
-    
+
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-    
+
 }
 
 
@@ -137,29 +146,27 @@ static inline void throwWithName( NSError *error, NSString* name )
     CDVPluginResult* pluginResult;
 
     __block NSString* eventName = command.arguments[0];
-    
+
     if (eventName == nil || [eventName length] == 0) {
         pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"eventName is null or empty"];
         [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
         return;
     }
-    
+
     id observer = self.observerMap[ eventName ];
-    
+
     if (observer) {
-        
+
         [[NSNotificationCenter defaultCenter] removeObserver:observer
                                                         name:eventName
                                                       object:self];
     }
-    
+
     pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
-    
+
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-    
+
 }
-
-
 
 - (void)fireNativeEvent:(CDVInvokedUrlCommand*)command
 {
@@ -187,4 +194,10 @@ static inline void throwWithName( NSError *error, NSString* name )
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
+/**
+ * Override method for onAppTerminate provided in CDVPlugin.h
+ */
+- (void)onAppTerminate {
+    [self fireJsEvent:@"willterminate" jsonData:@"{}" scheduledOnRunLoop:NO];
+}
 @end
