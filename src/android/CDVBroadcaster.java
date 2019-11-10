@@ -14,6 +14,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.Iterator;
+
+import static java.lang.String.format;
+
 /**
  * This class echoes a string called from JavaScript.
  */
@@ -41,13 +47,13 @@ public class CDVBroadcaster extends CordovaPlugin {
                 String method = null;
 
                 if( data == null ) {
-                    method = String.format("javascript:window.broadcaster.fireEvent( '%s', null );", eventName );
+                    method = format("javascript:window.broadcaster.fireEvent( '%s', null );", eventName );
                 }
                 else if( data instanceof JSONObject ) {
-                    method = String.format("javascript:window.broadcaster.fireEvent( '%s', %s );", eventName, data.toString() );
+                    method = format("javascript:window.broadcaster.fireEvent( '%s', %s );", eventName, data.toString() );
                 }
                 else  {
-                    method = String.format("javascript:window.broadcaster.fireEvent( '%s', '%s' );", eventName, data.toString() );
+                    method = format("javascript:window.broadcaster.fireEvent( '%s', '%s' );", eventName, data.toString() );
                 }
                 CDVBroadcaster.this.webView.loadUrl(method);
             }
@@ -95,6 +101,11 @@ public class CDVBroadcaster extends CordovaPlugin {
         return super.onMessage( id, data );
     }
 
+    /**
+     *
+     * @param eventName
+     * @param userData
+     */
     private void fireNativeEvent( final String eventName, JSONObject userData ) {
         if( eventName == null ) {
             throw new IllegalArgumentException("eventName parameter is null!");
@@ -102,7 +113,9 @@ public class CDVBroadcaster extends CordovaPlugin {
 
         final Intent intent = new Intent(eventName);
 
-        intent.putExtras(toBundle( new Bundle(), userData ));
+        final Bundle bundle = (userData == null ) ? new Bundle() : toBundle( userData );
+
+        intent.putExtras(bundle);
 
         sendBroadcast( intent );
     }
@@ -125,11 +138,14 @@ public class CDVBroadcaster extends CordovaPlugin {
 
             }
             final JSONObject userData = args.getJSONObject(1);
-
+            if( userData==null ) {
+                Log.w( TAG, "user data provided to native event is null!");
+            }
 
             cordova.getThreadPool().execute(new Runnable() {
                 @Override
                 public void run() {
+
                     fireNativeEvent(eventName, userData);
                 }
             });
@@ -189,9 +205,6 @@ public class CDVBroadcaster extends CordovaPlugin {
      */
     @Override
     public void onDestroy() {
-
-        this.fireEvent( "beforeunload", null);
-
         // deregister receiver
         for( BroadcastReceiver r : receiverMap.values() ) {
                     unregisterReceiver(r);
@@ -204,85 +217,22 @@ public class CDVBroadcaster extends CordovaPlugin {
     }
 
     /**
-     * Credit: https://github.com/darryncampbell/darryncampbell-cordova-plugin-intent
-     *
-     * @param bundle
-     * @param object
-     * @return
-     */
-    private static Bundle toBundle(final Bundle bundle, JSONObject object) {
-        if( bundle == null || object == null ) return bundle;
-
-        final java.util.Iterator<String> keys = object.keys();
-
-        while( keys.hasNext() ) {
-            final String key = keys.next();
-
-            if (object.isNull(key)) {
-                continue;
-            }
-
-            final Object value = object.opt(key);
-
-            if (value instanceof Boolean) {
-                bundle.putBoolean(key, (Boolean) value);
-            } else if (value instanceof Long) {
-                bundle.putLong(key, (Long) value);
-            } else if (value instanceof Double) {
-                bundle.putDouble(key, (Double) value);
-            } else if (value instanceof Integer) {
-                bundle.putInt(key, (Integer) value);
-            } else if (value instanceof JSONObject) {
-                bundle.putBundle(key, toBundle(new Bundle(), (JSONObject) value));
-            } else if (value instanceof JSONArray) {
-
-                try {
-                    final JSONArray values = (JSONArray) value;
-
-                    final JSONArray index = new JSONArray();
-                    for (int i = 0; i < values.length(); ++i) {
-                        index.put(String.valueOf(i));
-                    }
-
-                    bundle.putBundle(key, toBundle(new Bundle(), values.toJSONObject(index)));
-                } catch (JSONException e) {
-                    Log.w(TAG, String.format("error creating bundle from array for key %s", key), e);
-                }
-            } else {
-                bundle.putCharSequence(key, String.valueOf(value));
-            }
-        }
-
-        return bundle;
-    }
-
-    /**
-     * Credit: https://github.com/darryncampbell/darryncampbell-cordova-plugin-intent
+     *  Credit: https://github.com/napolitano/cordova-plugin-intent
      *
      * @param bundle
      * @return
      */
-    private static JSONObject toJsonObject(final Bundle bundle) {
-        final JSONObject result = new JSONObject();
+    private static JSONObject toJsonObject(Bundle bundle) {
 
-        if( bundle != null ) {
-
-            for (final String key : bundle.keySet()) {
-                try {
-                    result.putOpt(key, toJsonValue(bundle.get(key)));
-                } catch (JSONException e) {
-                    Log.w( TAG, String.format("error parsing Bundle key %s", key), e);
-                }
-            }
-
+        if( bundle == null ) {
+            Log.w( TAG, "bundle is null!" );
+            return new JSONObject();
         }
-
-        return result;
+        return (JSONObject) toJsonValue(bundle);
     }
 
     /**
-     *
-     * Credit: https://github.com/darryncampbell/darryncampbell-cordova-plugin-intent
+     * Credit: https://github.com/napolitano/cordova-plugin-intent
      *
      * @param value
      * @return
@@ -290,28 +240,130 @@ public class CDVBroadcaster extends CordovaPlugin {
      */
     private static Object toJsonValue(final Object value) {
 
-        if (value == null) return JSONObject.NULL;
-
-        if (value.getClass().isArray()) {
-            final JSONArray result = new JSONArray();
-            int length = java.lang.reflect.Array.getLength(value);
-            for (int i = 0; i < length; ++i) {
-                final Object v = java.lang.reflect.Array.get(value, i);
+        // Null
+        if (value == null) {
+            return JSONObject.NULL;
+        }
+        // Bundle
+        else if (value instanceof Bundle) {
+            final JSONObject result = new JSONObject();
+            final Bundle bundle = (Bundle) value;
+            for (final String key : bundle.keySet()) {
                 try {
-                    result.put(i, toJsonValue(v));
+                    final Object bundle_value = bundle.get(key);
+                    result.put(key, toJsonValue(bundle_value));
                 } catch (JSONException e) {
-                    Log.w( TAG, String.format("error parsing array element %d vaule %s", i,v), e);
+                    Log.w( TAG, format( "error getting key %s from bundle\n%s", key), e);
                 }
             }
             return result;
-        } else if ( value instanceof String
+        }
+        // Native Array
+        else if ((value.getClass().isArray())) {
+            final JSONArray result = new JSONArray();
+            int length = Array.getLength(value);
+            for (int i = 0; i < length; ++i) {
+                final Object array_value = Array.get(value, i);
+                result.put(toJsonValue(array_value));
+            }
+            return result;
+        }
+        // ArrayList<?>
+        else if (value instanceof ArrayList<?>) {
+            final ArrayList arrayList = (ArrayList<?>)value;
+            final JSONArray result = new JSONArray();
+            for ( Object array_value : arrayList ) {
+                result.put( toJsonValue(array_value) );
+            }
+            return result;
+        }
+        // Boolean | Integer | Long | Double
+        else if (
+                value instanceof String
                         || value instanceof Boolean
                         || value instanceof Integer
                         || value instanceof Long
                         || value instanceof Double) {
             return value;
-        } else {
+        }
+        // Other(s)
+        else {
             return String.valueOf(value);
         }
+    }
+
+    /**
+     * Credit: https://github.com/napolitano/cordova-plugin-intent
+     *
+     * @param obj
+     * @return
+     */
+    private Bundle toBundle(final JSONObject obj) {
+        final Bundle returnBundle = new Bundle();
+
+        if (obj == null) {
+            return null;
+        }
+
+        final Iterator<?> keys = obj.keys();
+
+        while(keys.hasNext())
+        {
+            final String key = (String)keys.next();
+
+            try {
+                final Object compare = obj.get(key);
+                // String
+                if (compare instanceof String)
+                    returnBundle.putString(key, obj.getString(key));
+                    // Boolean
+                else if (compare instanceof Boolean)
+                    returnBundle.putBoolean(key, obj.getBoolean(key));
+                    // Integer
+                else if (compare instanceof Integer)
+                    returnBundle.putInt(key, obj.getInt(key));
+                    // Long
+                else if (compare instanceof Long)
+                    returnBundle.putLong(key, obj.getLong(key));
+                    // Double
+                else if (compare instanceof Double)
+                    returnBundle.putDouble(key, obj.getDouble(key));
+                    // Array | JSONArray
+                else if (compare.getClass().isArray() || compare instanceof JSONArray) {
+                    final JSONArray jsonArray = obj.getJSONArray(key);
+                    int length = jsonArray.length();
+                    if (jsonArray.get(0) instanceof String) {
+                        final String[] stringArray = new String[length];
+                        for (int j = 0; j < length; j++)
+                            stringArray[j] = jsonArray.getString(j);
+                        returnBundle.putStringArray(key, stringArray);
+                        //returnBundle.putParcelableArray(key, obj.get);
+                    } else {
+                        if (key.equals("PLUGIN_CONFIG")) {
+                            final ArrayList<Bundle> bundleArray = new ArrayList<Bundle>();
+                            for (int k = 0; k < length; k++) {
+                                bundleArray.add(toBundle(jsonArray.getJSONObject(k)));
+                            }
+                            returnBundle.putParcelableArrayList(key, bundleArray);
+                        } else {
+                            final Bundle[] bundleArray = new Bundle[length];
+                            for (int k = 0; k < length; k++)
+                                bundleArray[k] = toBundle(jsonArray.getJSONObject(k));
+                            returnBundle.putParcelableArray(key, bundleArray);
+                        }
+                    }
+                }
+                // JSONObject
+                else if (compare instanceof JSONObject)
+                    returnBundle.putBundle(key, toBundle((JSONObject) obj.get(key)));
+            }
+            catch (JSONException e) {
+                Log.w( TAG, format( "error processing key %s \n%s", key ), e );
+            }
+
+        }
+
+
+        return returnBundle;
     }
 }
