@@ -52,8 +52,14 @@ $ cordova plugin add cordova-plugin-broadcaster
 ```Java
 final Intent intent = new Intent("didShow");
 
-Bundle b = new Bundle();
-b.putString( "data", "test" );
+final Bundle child = new Bundle();
+child.putString( "name", "joker");
+
+final Bundle b = new Bundle();
+b.putString( "data", "test");
+b.putBoolean( "valid", true );
+b.putBundle( "child", child );
+
 intent.putExtras( b);
 
 LocalBroadcastManager.getInstance(this).sendBroadcastSync(intent);
@@ -63,15 +69,28 @@ LocalBroadcastManager.getInstance(this).sendBroadcastSync(intent);
 
 ##### Objective-C
 ```Objective-C
-[[NSNotificationCenter defaultCenter] postNotificationName:@"didShow"
-                                                    object:nil
-                                                  userInfo:@{ @"data":@"test"}];
+    NSDictionary * payload = @{
+        @"data":@"test",
+        @"valid": [NSNumber numberWithBool:YES],
+        @"child": @{ @"name": @"joker" }
+    };
+    
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"TEST.EVENT"
+                                                        object:nil
+                                                      userInfo:payload];
 ```
 
-##### Swift
+##### Swift 5.x
 ```swift
-let nc = NSNotificationCenter.default
-nc.post(name:"didShow", object: nil, userInfo: ["data":"test"])
+
+  let payload:[String:Any] = [
+          "data":"test",
+          "valid": true,
+          "child":[ "name": "joker" ]
+      ]
+
+  let nc = NotificationCenter.default
+  nc.post(name:Notification.Name("didShow"), object: nil, userInfo: payload)
 ```
 
 #### BROWSER
@@ -124,7 +143,7 @@ LocalBroadcastManager.getInstance(this)
                                                     }];
 ```
 
-##### Swift 3.0
+##### Swift 5.x
 
 ```swift
 let nc = NotificationCenter.default
