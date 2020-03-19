@@ -1,3 +1,4 @@
+"use strict";
 var exec = require('cordova/exec');
 var channel = require('cordova/channel');
 var Broadcaster = /** @class */ (function () {
@@ -38,9 +39,6 @@ var Broadcaster = /** @class */ (function () {
             return _this._channels.hasOwnProperty(c);
         };
     }
-    Broadcaster.prototype._instanceOfAndroidData = function (object) {
-        return ('extras' in object && 'flag' in object && 'category' in object);
-    };
     /**
      * fire native evet
      *
@@ -57,12 +55,15 @@ var Broadcaster = /** @class */ (function () {
             isGlobal = globalFlagOrData;
             oData = data !== null && data !== void 0 ? data : null;
         }
-        else if (typeof globalFlagOrData != 'object') {
+        else if (typeof globalFlagOrData === 'object') {
             oData = globalFlagOrData;
         }
-        if (oData != null && this._instanceOfAndroidData(oData)) {
-            return exec(success, error, "broadcaster", "fireNativeEvent", [type, oData.extras, isGlobal, oData.flag, oData.category]);
-        }
+        //function instanceOfAndroidData( object:any ): object is AndroidData {
+        //  return ( 'extras' in object && 'flags' in object && 'category' in object )
+        //}
+        //if( oData!=null && this._instanceOfAndroidData(oData) ) {
+        //  return exec(success, error, "broadcaster", "fireNativeEvent", [ type, oData.extras, isGlobal, oData.flags, oData.category ]);
+        //}
         exec(success, error, "broadcaster", "fireNativeEvent", [type, oData, isGlobal]);
     };
     /**
@@ -102,7 +103,7 @@ var Broadcaster = /** @class */ (function () {
                 throw "listener must be defined!";
             f = listener;
         }
-        else if (typeof globalFlagOrListener != 'function') {
+        else if (typeof globalFlagOrListener === 'function') {
             f = globalFlagOrListener;
         }
         if (!this._channelExists(eventname)) {
@@ -117,25 +118,13 @@ var Broadcaster = /** @class */ (function () {
      * remove a listener
      *
      * @param eventname
-     * @param globalFlagOrListener
      * @param listener
      */
-    Broadcaster.prototype.removeEventListener = function (eventname, globalFlagOrListener, listener) {
+    Broadcaster.prototype.removeEventListener = function (eventname, listener) {
         var _this = this;
-        var isGlobal = false;
-        var f = function () { };
-        if (typeof globalFlagOrListener === 'boolean') {
-            isGlobal = globalFlagOrListener;
-            if (!listener)
-                throw "listener must be defined!";
-            f = listener;
-        }
-        else if (typeof globalFlagOrListener != 'function') {
-            f = globalFlagOrListener;
-        }
         if (this._channelExists(eventname)) {
-            if (this._channelUnsubscribe(eventname, f) === 0) {
-                exec(function () { return _this._channelDelete(eventname); }, function (err) { return console.log("ERROR removeEventListener: ", err); }, "broadcaster", "removeEventListener", [eventname, isGlobal]);
+            if (this._channelUnsubscribe(eventname, listener) === 0) {
+                exec(function () { return _this._channelDelete(eventname); }, function (err) { return console.log("ERROR removeEventListener: ", err); }, "broadcaster", "removeEventListener", [eventname]);
             }
         }
     };

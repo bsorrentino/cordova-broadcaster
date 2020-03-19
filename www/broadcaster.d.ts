@@ -1,21 +1,11 @@
-declare var exec: any;
-declare var channel: any;
 declare type Listener = (event: Event) => void;
 declare type AndroidData = {
     extras: object;
-    flag: number;
+    flags: number;
     category: string;
 };
-interface Channel {
-    subscribe(handler: Listener): void;
-    unsubscribe(handler: Listener): void;
-    fire(event: Event): void;
-    numHandlers: number;
-}
-declare type Channels = {
-    [key: string]: Channel;
-};
-declare class Broadcaster {
+
+interface CordovaBroadcaster {
     /**
      * fire native evet
      *
@@ -34,13 +24,6 @@ declare class Broadcaster {
      * @param error 
      */    
     fireNativeEvent(type: string, isGlobal:boolean, data: object | AndroidData | null, success?: () => void, error?: (message: string) => void): void;    
-    /**
-     * fire local event
-     *
-     * @param type
-     * @param data
-     */
-    fireEvent(type: string, data: object | null): void;
     /**
      * add a listener
      *
@@ -63,12 +46,10 @@ declare class Broadcaster {
      * @param listener
      */
     removeEventListener(eventname: string, listener: Listener): void;
-    /**
-     * remove a global listener (valid only for android)
-     *
-     * @param eventname
-     * @param globalFlagOrListener
-     * @param listener
-     */
-    removeEventListener(eventname: string, isGlobal: boolean, listener: Listener): void;
-}
+  }
+  
+  interface Window {
+    broadcaster: CordovaBroadcaster;
+  }
+  
+  declare var broadcaster: CordovaBroadcaster;

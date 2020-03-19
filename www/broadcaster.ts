@@ -5,7 +5,7 @@ var channel = require('cordova/channel');
 type  Listener = (event:Event)=>void;
 type AndroidData = {
   extras:object;
-  flag:number;
+  flags:number;
   category:string;
 }
 
@@ -59,9 +59,7 @@ class Broadcaster {
      return this._channels.hasOwnProperty(c);
   }
 
-  private _instanceOfAndroidData( object:any ): object is AndroidData {
-    return ( 'extras' in object && 'flag' in object && 'category' in object )
-  }
+  
   /**
    * fire native evet
    * 
@@ -81,15 +79,19 @@ class Broadcaster {
       
       oData = data ?? null 
 
-    } else if( typeof globalFlagOrData != 'object') {
+    } else if( typeof globalFlagOrData === 'object') {
       
       oData = globalFlagOrData
     
     }
+
+    //function instanceOfAndroidData( object:any ): object is AndroidData {
+    //  return ( 'extras' in object && 'flags' in object && 'category' in object )
+    //}
     
-    if( oData!=null && this._instanceOfAndroidData(oData) ) {
-      return exec(success, error, "broadcaster", "fireNativeEvent", [ type, oData.extras, isGlobal, oData.flag, oData.category ]);
-    }
+    //if( oData!=null && this._instanceOfAndroidData(oData) ) {
+    //  return exec(success, error, "broadcaster", "fireNativeEvent", [ type, oData.extras, isGlobal, oData.flags, oData.category ]);
+    //}
     
     exec(success, error, "broadcaster", "fireNativeEvent", [ type, oData, isGlobal ]);
   }
@@ -134,7 +136,7 @@ class Broadcaster {
       
       f = listener
 
-    } else if( typeof globalFlagOrListener != 'function') {
+    } else if( typeof globalFlagOrListener === 'function') {
       
       f = globalFlagOrListener
     
@@ -155,31 +157,15 @@ class Broadcaster {
    * remove a listener
    * 
    * @param eventname 
-   * @param globalFlagOrListener 
    * @param listener 
    */
-  removeEventListener(eventname:string, globalFlagOrListener: boolean|Listener, listener?:Listener):void {
-    let isGlobal = false
-    let f:Listener = () => {}
-
-    if( typeof globalFlagOrListener === 'boolean') {
-      isGlobal = globalFlagOrListener 
-      
-      if( !listener ) throw "listener must be defined!";
-      
-      f = listener
-
-    } else if( typeof globalFlagOrListener != 'function') {
-      
-      f = globalFlagOrListener
-    
-    }
+  removeEventListener(eventname:string, listener:Listener):void {
 
      if (this._channelExists(eventname)) {
-        if( this._channelUnsubscribe(eventname, f) === 0 ) {
+        if( this._channelUnsubscribe(eventname, listener) === 0 ) {
           exec( () => this._channelDelete(eventname),
                 (err:any) => console.log( "ERROR removeEventListener: ", err),
-                "broadcaster", "removeEventListener", [ eventname, isGlobal ]);
+                "broadcaster", "removeEventListener", [ eventname ]);
 
         }
      }
