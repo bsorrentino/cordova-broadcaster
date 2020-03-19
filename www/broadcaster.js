@@ -1,7 +1,3 @@
-
-
-
-
 "use strict";
 var exec = require('cordova/exec');
 var channel = require('cordova/channel');
@@ -91,6 +87,27 @@ var Broadcaster = /** @class */ (function () {
         if (this._channelExists(eventname)) {
             if (this._channelUnsubscribe(eventname, f) === 0) {
                 exec(function () { return _this._channelDelete(eventname); }, function (err) { return console.log("ERROR removeEventListener: ", err); }, "broadcaster", "removeEventListener", [eventname]);
+            }
+        }
+    };
+    Broadcaster.prototype.sendBroadcast = function (action, extras, flags, category, onSuccess, onError) {
+        exec(onSuccess, onError, "broadcaster", "sendGlobalBroadcast", [action, extras, flags, category]);
+    };
+    Broadcaster.prototype.registerExternalIntentReceiver = function (eventname, f) {
+        var _this = this;
+        if (!this._channelExists(eventname)) {
+            this._channelCreate(eventname);
+            exec(function () { return _this._channelSubscribe(eventname, f); }, function (err) { return console.log("ERROR registerExternalIntentReceiver: ", err); }, "broadcaster", "registerExternalIntentReceiver", [eventname]);
+        }
+        else {
+            this._channelSubscribe(eventname, f);
+        }
+    };
+    Broadcaster.prototype.unregisterExternalIntentReceiver = function (eventname, f) {
+        var _this = this;
+        if (this._channelExists(eventname)) {
+            if (this._channelUnsubscribe(eventname, f) === 0) {
+                exec(function () { return _this._channelDelete(eventname); }, function (err) { return console.log("ERROR unregisterExternalIntentReceiver: ", err); }, "broadcaster", "unregisterExternalIntentReceiver", [eventname]);
             }
         }
     };

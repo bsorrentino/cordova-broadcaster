@@ -116,7 +116,40 @@ class Broadcaster {
      }
   }
 
-}
+  sendBroadcast(action, extras, flags, category, onSuccess, onError) {
 
+    exec(onSuccess, onError, "broadcaster","sendGlobalBroadcast",[action,extras, flags, category ]);
+  
+  }
+  
+
+  registerExternalIntentReceiver(eventname:string ,f) {
+
+    if (!this._channelExists(eventname)) {
+        this._channelCreate(eventname);
+        exec( 
+          () => this._channelSubscribe(eventname,f), 
+          (err:any)  => console.log( "ERROR registerExternalIntentReceiver: ", err), 
+          "broadcaster", "registerExternalIntentReceiver", [ eventname ]);
+    }
+    else {
+        this._channelSubscribe(eventname,f);
+    }
+  }
+
+  unregisterExternalIntentReceiver(eventname:string, f) {
+
+    if (this._channelExists(eventname)) {
+        if( this._channelUnsubscribe(eventname, f) === 0 ) {
+            exec( 
+              () => this._channelDelete(eventname),
+              (err:any) => console.log( "ERROR unregisterExternalIntentReceiver: ", err),
+              "broadcaster", "unregisterExternalIntentReceiver", [ eventname ]);
+  
+        }
+    }
+  }
+    
+}
 
 module.exports = new Broadcaster();

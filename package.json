@@ -35,6 +35,8 @@
   },
   "homepage": "https://github.com/bsorrentino/cordova-broadcaster#readme",
   "devDependencies": {
-    "@types/cordova": "0.0.34"
+    "@types/cordova": "0.0.34",
+    "@types/node": "^13.9.2",
+    "typescript": "^3.8.3"
   }
 }
