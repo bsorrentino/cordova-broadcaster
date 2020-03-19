@@ -1,20 +1,3 @@
-# Cordova Broadcaster (allows broadcast intents to  external Apps and receive intent from external Apps)
-
-Cordova Plugin to allow message exchange between javascript and native (and viceversa).
-
-
-this project is a fork from [cordova-broadcaster](https://github.com/bsorrentino/cordova-broadcaster)
-Thanks to **bsorrentino**
-
-####we've added support to:
-* Broadcast Intent to external Apps.
-* Register actions to receive Broadcast Intents from external Apps
-* added Flags support on intent
-* added Category support on intent
-
-
-//TODO:
- Doc...
 # Cordova Broadcaster
 
 Cordova Plugin to allow message exchange between javascript and native (and viceversa).
@@ -34,6 +17,7 @@ Android | **[LocalBroadcastManager](http://developer.android.com/reference/andro
 ## News
   date |  infos | refs
 ---- | ---- | ----
+Mar 19, 2020 | Concerning **Android** I've added support for **broadcast Intent to external Apps**, **receive broadcast Intents from external Apps**, **Flags & Category on Intent** insipred by [navarrojava's fork](https://github.com/navarrojava/cordova-broadcaster/)
 Jan 16, 2018 | I've developed a complete **ionic3** sample project using **broadcaster** | [ionic-broadcaster-sample](https://github.com/bsorrentino/ionic-broadcaster-sample)
 Jan 28, 2017 | such plugin has been added to [ionic-native](https://ionicframework.com/docs/v2/native/broadcaster/) distribution | **How to** is available   [here](https://ionicframework.com/docs/v2/native/broadcaster/)
 
