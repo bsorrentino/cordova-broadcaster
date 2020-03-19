@@ -3,6 +3,11 @@ var exec    = require('cordova/exec');
 var channel = require('cordova/channel');
 
 type  Listener = (event:Event)=>void;
+type AndroidData = {
+  extras:object;
+  flag:number;
+  category:string;
+}
 
 interface Channel {
   subscribe( handler:Listener ):void;
@@ -54,18 +59,46 @@ class Broadcaster {
      return this._channels.hasOwnProperty(c);
   }
 
+  private _instanceOfAndroidData( object:any ): object is AndroidData {
+    return ( 'extras' in object && 'flag' in object && 'category' in object )
+  }
   /**
    * fire native evet
-   *
+   * 
+   * @param type 
+   * @param globalFlagOrData 
+   * @param data 
+   * @param success 
+   * @param error 
    */
-  fireNativeEvent(type: string, data: object | null, success?: () => void, error?: (message: string) => void):void
+  fireNativeEvent(type: string, globalFlagOrData:boolean|object|AndroidData|null, data?:object|AndroidData|null, success?: () => void, error?: (message: string) => void):void
   {
-       exec(success, error, "broadcaster", "fireNativeEvent", [ type, data ]);
+    let isGlobal = false
+    let oData:object|AndroidData|null = null
+
+    if( typeof globalFlagOrData === 'boolean') {
+      isGlobal = globalFlagOrData
+      
+      oData = data ?? null 
+
+    } else if( typeof globalFlagOrData != 'object') {
+      
+      oData = globalFlagOrData
+    
+    }
+    
+    if( oData!=null && this._instanceOfAndroidData(oData) ) {
+      return exec(success, error, "broadcaster", "fireNativeEvent", [ type, oData.extras, isGlobal, oData.flag, oData.category ]);
+    }
+    
+    exec(success, error, "broadcaster", "fireNativeEvent", [ type, oData, isGlobal ]);
   }
 
   /**
-   * fire local evet
-   *
+   * fire local event
+   * 
+   * @param type 
+   * @param data 
    */
   fireEvent(type:string, data: object | null ):void
   {
@@ -85,15 +118,33 @@ class Broadcaster {
 
   /**
    * add a listener
-   *
+   * 
+   * @param eventname 
+   * @param globalFlagOrListener 
+   * @param listener 
    */
-  addEventListener(eventname:string,f:Listener):void {
+  addEventListener(eventname:string, globalFlagOrListener: boolean|Listener, listener?:Listener):void {
+    let isGlobal = false
+    let f:Listener = () => {}
+
+    if( typeof globalFlagOrListener === 'boolean') {
+      isGlobal = globalFlagOrListener
+      
+      if( !listener ) throw "listener must be defined!";
+      
+      f = listener
+
+    } else if( typeof globalFlagOrListener != 'function') {
+      
+      f = globalFlagOrListener
+    
+    }
 
      if (!this._channelExists(eventname)) {
          this._channelCreate(eventname);
          exec( () => this._channelSubscribe(eventname,f),
               (err:any) => console.log( "ERROR addEventListener: ", err),
-              "broadcaster", "addEventListener", [ eventname ]);
+              "broadcaster", "addEventListener", [ eventname, isGlobal ]);
      }
      else {
        this._channelSubscribe(eventname,f);
@@ -102,53 +153,38 @@ class Broadcaster {
 
   /**
    * remove a listener
-   *
+   * 
+   * @param eventname 
+   * @param globalFlagOrListener 
+   * @param listener 
    */
-  removeEventListener(eventname:string, f:Listener):void {
+  removeEventListener(eventname:string, globalFlagOrListener: boolean|Listener, listener?:Listener):void {
+    let isGlobal = false
+    let f:Listener = () => {}
+
+    if( typeof globalFlagOrListener === 'boolean') {
+      isGlobal = globalFlagOrListener 
+      
+      if( !listener ) throw "listener must be defined!";
+      
+      f = listener
+
+    } else if( typeof globalFlagOrListener != 'function') {
+      
+      f = globalFlagOrListener
+    
+    }
 
      if (this._channelExists(eventname)) {
         if( this._channelUnsubscribe(eventname, f) === 0 ) {
           exec( () => this._channelDelete(eventname),
                 (err:any) => console.log( "ERROR removeEventListener: ", err),
-                "broadcaster", "removeEventListener", [ eventname ]);
+                "broadcaster", "removeEventListener", [ eventname, isGlobal ]);
 
         }
      }
   }
 
-  sendBroadcast(action:string, extras: object, flags:number, category:string, onSuccess?: () => void, onError?: (message: string) => void ) {
-
-    exec(onSuccess, onError, "broadcaster","sendGlobalBroadcast",[action,extras, flags, category ]);
-  
-  }
-  
-
-  registerExternalIntentReceiver(eventname:string ,f) {
-
-    if (!this._channelExists(eventname)) {
-        this._channelCreate(eventname);
-        exec( 
-          () => this._channelSubscribe(eventname,f), 
-          (err:any)  => console.log( "ERROR registerExternalIntentReceiver: ", err), 
-          "broadcaster", "registerExternalIntentReceiver", [ eventname ]);
-    }
-    else {
-        this._channelSubscribe(eventname,f);
-    }
-  }
-
-  unregisterExternalIntentReceiver(eventname:string, f) {
-
-    if (this._channelExists(eventname)) {
-        if( this._channelUnsubscribe(eventname, f) === 0 ) {
-            exec( 
-              () => this._channelDelete(eventname),
-              (err:any) => console.log( "ERROR unregisterExternalIntentReceiver: ", err),
-              "broadcaster", "unregisterExternalIntentReceiver", [ eventname ]);
-  
-        }
-    }
-  }
     
 }
 

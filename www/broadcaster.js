@@ -1,4 +1,3 @@
-"use strict";
 var exec = require('cordova/exec');
 var channel = require('cordova/channel');
 var Broadcaster = /** @class */ (function () {
@@ -39,16 +38,38 @@ var Broadcaster = /** @class */ (function () {
             return _this._channels.hasOwnProperty(c);
         };
     }
+    Broadcaster.prototype._instanceOfAndroidData = function (object) {
+        return ('extras' in object && 'flag' in object && 'category' in object);
+    };
     /**
      * fire native evet
      *
+     * @param type
+     * @param globalFlagOrData
+     * @param data
+     * @param success
+     * @param error
      */
-    Broadcaster.prototype.fireNativeEvent = function (type, data, success, error) {
-        exec(success, error, "broadcaster", "fireNativeEvent", [type, data]);
+    Broadcaster.prototype.fireNativeEvent = function (type, globalFlagOrData, data, success, error) {
+        var isGlobal = false;
+        var oData = null;
+        if (typeof globalFlagOrData === 'boolean') {
+            isGlobal = globalFlagOrData;
+            oData = data !== null && data !== void 0 ? data : null;
+        }
+        else if (typeof globalFlagOrData != 'object') {
+            oData = globalFlagOrData;
+        }
+        if (oData != null && this._instanceOfAndroidData(oData)) {
+            return exec(success, error, "broadcaster", "fireNativeEvent", [type, oData.extras, isGlobal, oData.flag, oData.category]);
+        }
+        exec(success, error, "broadcaster", "fireNativeEvent", [type, oData, isGlobal]);
     };
     /**
-     * fire local evet
+     * fire local event
      *
+     * @param type
+     * @param data
      */
     Broadcaster.prototype.fireEvent = function (type, data) {
         if (!this._channelExists(type))
@@ -67,12 +88,26 @@ var Broadcaster = /** @class */ (function () {
     /**
      * add a listener
      *
+     * @param eventname
+     * @param globalFlagOrListener
+     * @param listener
      */
-    Broadcaster.prototype.addEventListener = function (eventname, f) {
+    Broadcaster.prototype.addEventListener = function (eventname, globalFlagOrListener, listener) {
         var _this = this;
+        var isGlobal = false;
+        var f = function () { };
+        if (typeof globalFlagOrListener === 'boolean') {
+            isGlobal = globalFlagOrListener;
+            if (!listener)
+                throw "listener must be defined!";
+            f = listener;
+        }
+        else if (typeof globalFlagOrListener != 'function') {
+            f = globalFlagOrListener;
+        }
         if (!this._channelExists(eventname)) {
             this._channelCreate(eventname);
-            exec(function () { return _this._channelSubscribe(eventname, f); }, function (err) { return console.log("ERROR addEventListener: ", err); }, "broadcaster", "addEventListener", [eventname]);
+            exec(function () { return _this._channelSubscribe(eventname, f); }, function (err) { return console.log("ERROR addEventListener: ", err); }, "broadcaster", "addEventListener", [eventname, isGlobal]);
         }
         else {
             this._channelSubscribe(eventname, f);
@@ -81,33 +116,26 @@ var Broadcaster = /** @class */ (function () {
     /**
      * remove a listener
      *
+     * @param eventname
+     * @param globalFlagOrListener
+     * @param listener
      */
-    Broadcaster.prototype.removeEventListener = function (eventname, f) {
+    Broadcaster.prototype.removeEventListener = function (eventname, globalFlagOrListener, listener) {
         var _this = this;
+        var isGlobal = false;
+        var f = function () { };
+        if (typeof globalFlagOrListener === 'boolean') {
+            isGlobal = globalFlagOrListener;
+            if (!listener)
+                throw "listener must be defined!";
+            f = listener;
+        }
+        else if (typeof globalFlagOrListener != 'function') {
+            f = globalFlagOrListener;
+        }
         if (this._channelExists(eventname)) {
             if (this._channelUnsubscribe(eventname, f) === 0) {
-                exec(function () { return _this._channelDelete(eventname); }, function (err) { return console.log("ERROR removeEventListener: ", err); }, "broadcaster", "removeEventListener", [eventname]);
-            }
-        }
-    };
-    Broadcaster.prototype.sendBroadcast = function (action, extras, flags, category, onSuccess, onError) {
-        exec(onSuccess, onError, "broadcaster", "sendGlobalBroadcast", [action, extras, flags, category]);
-    };
-    Broadcaster.prototype.registerExternalIntentReceiver = function (eventname, f) {
-        var _this = this;
-        if (!this._channelExists(eventname)) {
-            this._channelCreate(eventname);
-            exec(function () { return _this._channelSubscribe(eventname, f); }, function (err) { return console.log("ERROR registerExternalIntentReceiver: ", err); }, "broadcaster", "registerExternalIntentReceiver", [eventname]);
-        }
-        else {
-            this._channelSubscribe(eventname, f);
-        }
-    };
-    Broadcaster.prototype.unregisterExternalIntentReceiver = function (eventname, f) {
-        var _this = this;
-        if (this._channelExists(eventname)) {
-            if (this._channelUnsubscribe(eventname, f) === 0) {
-                exec(function () { return _this._channelDelete(eventname); }, function (err) { return console.log("ERROR unregisterExternalIntentReceiver: ", err); }, "broadcaster", "unregisterExternalIntentReceiver", [eventname]);
+                exec(function () { return _this._channelDelete(eventname); }, function (err) { return console.log("ERROR removeEventListener: ", err); }, "broadcaster", "removeEventListener", [eventname, isGlobal]);
             }
         }
     };
