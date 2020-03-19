@@ -71,12 +71,12 @@ class Broadcaster {
   {
     if( !this._channelExists(type) ) return;
 
-    var event = document.createEvent('Event');
+    const event = document.createEvent('Event');
     event.initEvent(type, false, false);
     if (data) {
         for (var i in data) {
             if (data.hasOwnProperty(i)) {
-                event[i] = data[i];
+                (<any>event)[i] = (<any>data)[i];
             }
         }
     }
@@ -116,7 +116,7 @@ class Broadcaster {
      }
   }
 
-  sendBroadcast(action, extras, flags, category, onSuccess, onError) {
+  sendBroadcast(action:string, extras: object, flags:number, category:string, onSuccess?: () => void, onError?: (message: string) => void ) {
 
     exec(onSuccess, onError, "broadcaster","sendGlobalBroadcast",[action,extras, flags, category ]);
   
