@@ -64,7 +64,6 @@ static inline void throwWithName( NSError *error, NSString* name )
     if (!_observerMap) {
         _observerMap = [[NSMutableDictionary alloc] initWithCapacity:100];
     }
-
     return _observerMap;
 }
 
@@ -146,7 +145,6 @@ static inline void throwWithName( NSError *error, NSString* name )
     CDVPluginResult* pluginResult;
 
     __block NSString* eventName = command.arguments[0];
-
     if (eventName == nil || [eventName length] == 0) {
         pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"eventName is null or empty"];
         [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];

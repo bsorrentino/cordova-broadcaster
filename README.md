@@ -17,6 +17,7 @@ Android | **[LocalBroadcastManager](http://developer.android.com/reference/andro
 ## News
   date |  infos | refs
 ---- | ---- | ----
+Mar 19, 2020 | Concerning **Android** I've added support for **broadcast Intent to external Apps**, **receive broadcast Intents from external Apps**, **Flags & Category on Intent** | insipred by [navarrojava's fork](https://github.com/navarrojava/cordova-broadcaster/)
 Jan 16, 2018 | I've developed a complete **ionic3** sample project using **broadcaster** | [ionic-broadcaster-sample](https://github.com/bsorrentino/ionic-broadcaster-sample)
 Jan 28, 2017 | such plugin has been added to [ionic-native](https://ionicframework.com/docs/v2/native/broadcaster/) distribution | **How to** is available   [here](https://ionicframework.com/docs/v2/native/broadcaster/)
 

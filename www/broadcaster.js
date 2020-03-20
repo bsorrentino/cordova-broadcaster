@@ -42,13 +42,35 @@ var Broadcaster = /** @class */ (function () {
     /**
      * fire native evet
      *
+     * @param type
+     * @param globalFlagOrData
+     * @param data
+     * @param success
+     * @param error
      */
-    Broadcaster.prototype.fireNativeEvent = function (type, data, success, error) {
-        exec(success, error, "broadcaster", "fireNativeEvent", [type, data]);
+    Broadcaster.prototype.fireNativeEvent = function (type, globalFlagOrData, data, success, error) {
+        var isGlobal = false;
+        var oData = null;
+        if (typeof globalFlagOrData === 'boolean') {
+            isGlobal = globalFlagOrData;
+            oData = data !== null && data !== void 0 ? data : null;
+        }
+        else if (typeof globalFlagOrData === 'object') {
+            oData = globalFlagOrData;
+        }
+        //function instanceOfAndroidData( object:any ): object is AndroidData {
+        //  return ( 'extras' in object && 'flags' in object && 'category' in object )
+        //}
+        //if( oData!=null && this._instanceOfAndroidData(oData) ) {
+        //  return exec(success, error, "broadcaster", "fireNativeEvent", [ type, oData.extras, isGlobal, oData.flags, oData.category ]);
+        //}
+        exec(success, error, "broadcaster", "fireNativeEvent", [type, oData, isGlobal]);
     };
     /**
-     * fire local evet
+     * fire local event
      *
+     * @param type
+     * @param data
      */
     Broadcaster.prototype.fireEvent = function (type, data) {
         if (!this._channelExists(type))
@@ -67,12 +89,26 @@ var Broadcaster = /** @class */ (function () {
     /**
      * add a listener
      *
+     * @param eventname
+     * @param globalFlagOrListener
+     * @param listener
      */
-    Broadcaster.prototype.addEventListener = function (eventname, f) {
+    Broadcaster.prototype.addEventListener = function (eventname, globalFlagOrListener, listener) {
         var _this = this;
+        var isGlobal = false;
+        var f = function () { };
+        if (typeof globalFlagOrListener === 'boolean') {
+            isGlobal = globalFlagOrListener;
+            if (!listener)
+                throw "listener must be defined!";
+            f = listener;
+        }
+        else if (typeof globalFlagOrListener === 'function') {
+            f = globalFlagOrListener;
+        }
         if (!this._channelExists(eventname)) {
             this._channelCreate(eventname);
-            exec(function () { return _this._channelSubscribe(eventname, f); }, function (err) { return console.log("ERROR addEventListener: ", err); }, "broadcaster", "addEventListener", [eventname]);
+            exec(function () { return _this._channelSubscribe(eventname, f); }, function (err) { return console.log("ERROR addEventListener: ", err); }, "broadcaster", "addEventListener", [eventname, isGlobal]);
         }
         else {
             this._channelSubscribe(eventname, f);
@@ -81,11 +117,13 @@ var Broadcaster = /** @class */ (function () {
     /**
      * remove a listener
      *
+     * @param eventname
+     * @param listener
      */
-    Broadcaster.prototype.removeEventListener = function (eventname, f) {
+    Broadcaster.prototype.removeEventListener = function (eventname, listener) {
         var _this = this;
         if (this._channelExists(eventname)) {
-            if (this._channelUnsubscribe(eventname, f) === 0) {
+            if (this._channelUnsubscribe(eventname, listener) === 0) {
                 exec(function () { return _this._channelDelete(eventname); }, function (err) { return console.log("ERROR removeEventListener: ", err); }, "broadcaster", "removeEventListener", [eventname]);
             }
         }
