@@ -37,6 +37,12 @@
   "devDependencies": {
     "@types/cordova": "0.0.34",
     "@types/node": "^13.9.2",
+    "auto-changelog": "^1.16.2",
+    "npx-run": "^2.1.2",
     "typescript": "^3.8.3"
-  }
+  },
+  "scripts": {
+    "changelog": "auto-changelog -u"
+  },
+  "dependencies": {}
 }
