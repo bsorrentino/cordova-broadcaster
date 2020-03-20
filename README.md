@@ -47,6 +47,21 @@ $ cordova plugin add cordova-plugin-broadcaster
 
     window.broadcaster.addEventListener( "didShow", listener);
 ```
+### From ANDROID to Javascript - Extra ANDROID features 
+
+#### Listen for global message
+```javascript
+if( cordova.platformId === "android" ) {
+
+    var listener = function( e ) {
+      //log: didShow received! userInfo: {"data":"test"}
+      console.log( "CONNECTIVITY_CHANGE: " + JSON.stringify(e)  );
+    }
+    var isGlobal = true
+    window.broadcaster.addEventListener( 'android.net.conn.CONNECTIVITY_CHANGE', isGlobal, listener);
+}
+```
+
 
 #### ANDROID
 
@@ -102,7 +117,7 @@ let event = new CustomEvent("didShow", { detail: { data:"test"} } );
 document.dispatchEvent( event )
 
 ```
-### From Javascript to Native
+### From Javascript to Native - ANDROID,BROWSER,IOS
 
 #### Javascript
 
@@ -110,7 +125,46 @@ document.dispatchEvent( event )
   window.broadcaster.fireNativeEvent( "test.event", { item:'test data' }, function() {
     console.log( "event fired!" );
     } );
- ```
+```
+
+### From Javascript to ANDROID - Extra ANDROID features 
+
+#### Send a message with "flags" and "category"
+```javascript
+if( cordova.platformId === "android" ) {
+
+  // send a message with "flags" and "category"
+  window.broadcaster.fireNativeEvent( "message", { extras:{ item:'test data' }, flags:0, category:'android.intent.category.INFO'}, function() {
+    console.log( "event fired!" );
+  });
+}
+```
+
+#### Send a global message
+```javascript
+if( cordova.platformId === "android" ) {
+
+  // send a global message
+  var isGlobal = true
+  window.broadcaster.fireNativeEvent( "GLOBAL_ACTION", isGlobal, { item:'test data' }, function() {
+    console.log( "event fired!" );
+  });
+
+}
+```
+
+#### Send a global message with "flags" and "category"
+```javascript
+if( cordova.platformId === "android" ) {
+
+  // send a global message with "flags" and "category"
+  var isGlobal = true
+  window.broadcaster.fireNativeEvent( "GLOBAL_ACTION", isGlobal, { extras:{ item:'test data' }, flags:0, category:'android.intent.category.INFO'}, function() {
+    console.log( "event fired!" );
+  });
+
+}
+```
 
 #### ANDROID
 
