@@ -172,10 +172,18 @@ public class CDVBroadcaster extends CordovaPlugin {
       intent.addCategory(userData.category);
     }
 
+    try {
+      String packageName = userData.extras.getString("packageName");
+      if (packageName != null) {
+        Log.w(TAG, packageName);
+        intent.setPackage(packageName);
+      }
+    } catch (Exception e) {
+      Log.w(TAG, e);
+    }
+
     final Bundle bundle = (userData == null) ? new Bundle() : toBundle(userData.extras);
-
     intent.putExtras(bundle);
-
     sendBroadcast(intent, isGlobal);
   }
 
