@@ -47,7 +47,7 @@ $ cordova plugin add cordova-plugin-broadcaster
 
     window.broadcaster.addEventListener( "didShow", listener);
 ```
-### From ANDROID to Javascript - Extra ANDROID features 
+### From ANDROID to Javascript - Extra ANDROID features
 
 #### Listen for global message
 ```javascript
@@ -90,7 +90,7 @@ LocalBroadcastManager.getInstance(this).sendBroadcastSync(intent);
         @"valid": [NSNumber numberWithBool:YES],
         @"child": @{ @"name": @"joker" }
     };
-    
+
     [[NSNotificationCenter defaultCenter] postNotificationName:@"TEST.EVENT"
                                                         object:nil
                                                       userInfo:payload];
@@ -127,14 +127,14 @@ document.dispatchEvent( event )
     } );
 ```
 
-### From Javascript to ANDROID - Extra ANDROID features 
+### From Javascript to ANDROID - Extra ANDROID features
 
 #### Send a message with "flags" and "category"
 ```javascript
 if( cordova.platformId === "android" ) {
 
   // send a message with "flags" and "category"
-  window.broadcaster.fireNativeEvent( "message", { extras:{ item:'test data' }, flags:0, category:'android.intent.category.INFO'}, function() {
+  window.broadcaster.fireNativeEvent( "message", { extras:{ item:'test data' }, flags:0, category:'android.intent.category.INFO', packageName:'org.bsc'}, function() {
     console.log( "event fired!" );
   });
 }
@@ -159,7 +159,7 @@ if( cordova.platformId === "android" ) {
 
   // send a global message with "flags" and "category"
   var isGlobal = true
-  window.broadcaster.fireNativeEvent( "GLOBAL_ACTION", isGlobal, { extras:{ item:'test data' }, flags:0, category:'android.intent.category.INFO'}, function() {
+  window.broadcaster.fireNativeEvent( "GLOBAL_ACTION", isGlobal, { extras:{ item:'test data' }, flags:0, category:'android.intent.category.INFO', packageName:'org.bsc'}, function() {
     console.log( "event fired!" );
   });
 
