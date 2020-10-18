@@ -19,6 +19,43 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 import static java.lang.String.format;
+import static java.lang.String.valueOf;
+
+
+// replace with java.util.function.Consumer when moving on min version 24
+interface Consumer<T> {
+  void accept( T value );
+}
+
+// replace with java.util.Optional when moving on min version 24
+class Optional<T>  {
+
+  static <T> Optional<T> ofNullable( T value ) {
+    return new Optional<T>( value );
+  }
+
+  static <T> Optional<T> empty( ) {
+    return new Optional<T>( null );
+  }
+
+  private final T ref;
+
+  private Optional(T ref) {
+    this.ref = ref;
+  }
+
+  public void ifPresent(Consumer<? super T> consumer) {
+    if( consumer!=null && isPresent() ) consumer.accept( ref );
+  }
+  public boolean isPresent() {
+    return (ref!=null);
+  }
+
+  public T orElse(T other) {
+    return isPresent() ? ref : other;
+  }
+
+}
 
 /**
  * This class echoes a string called from JavaScript.
@@ -28,22 +65,30 @@ public class CDVBroadcaster extends CordovaPlugin {
   static class Data {
 
     final JSONObject extras;
-    final Integer flags;
-    final String category;
+    final Optional<Integer> flags;
+    final Optional<String> category;
+    final Optional<String> packageName;
 
     final boolean isAndroidSpecific;
 
     Data(final JSONObject userData) {
-      if (userData.has("extras") && userData.has("flags") && userData.has("category")) {
+      boolean hasFlags = userData.has("flags");
+      if (userData.has("extras") && ( hasFlags || userData.has("category") || userData.has("packageName")) ) {
+
         extras = userData.optJSONObject("extras");
-        flags = userData.optInt("flags");
-        category = userData.optString("category");
+        flags = ( hasFlags ) ? Optional.ofNullable( userData.optInt("flags") ) : Optional.empty();
+        category = Optional.ofNullable(userData.optString("category", null));
+        packageName = Optional.ofNullable( userData.optString("packageName", null));
         isAndroidSpecific = true;
+
       } else {
+
         extras = userData;
-        flags = null;
-        category = null;
+        flags = Optional.empty();
+        category = Optional.empty();
+        packageName = Optional.empty();
         isAndroidSpecific = false;
+
       }
     }
 
@@ -168,14 +213,22 @@ public class CDVBroadcaster extends CordovaPlugin {
     final Intent intent = new Intent(eventNameOrAction);
 
     if (userData.isAndroidSpecific) {
-      intent.addFlags(userData.flags);
-      intent.addCategory(userData.category);
+      userData.flags.ifPresent( (flags) -> {
+        Log.d(TAG, format( "set intent flags: '%s'", valueOf(flags)) );
+        intent.addFlags(flags);
+      });
+      userData.category.ifPresent( (category) -> {
+        Log.d(TAG, format( "set intent category: '%s'", category) );
+        intent.addCategory(category);
+      });
+      userData.packageName.ifPresent( (packageName) -> {
+        Log.d(TAG, format( "set intent package: '%s'", packageName) );
+        intent.setPackage(packageName);
+      });
     }
 
     final Bundle bundle = (userData == null) ? new Bundle() : toBundle(userData.extras);
-
     intent.putExtras(bundle);
-
     sendBroadcast(intent, isGlobal);
   }
 
@@ -352,7 +405,7 @@ public class CDVBroadcaster extends CordovaPlugin {
     }
     // Other(s)
     else {
-      return String.valueOf(value);
+      return valueOf(value);
     }
   }
 
