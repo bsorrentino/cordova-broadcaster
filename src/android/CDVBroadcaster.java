@@ -213,17 +213,26 @@ public class CDVBroadcaster extends CordovaPlugin {
     final Intent intent = new Intent(eventNameOrAction);
 
     if (userData.isAndroidSpecific) {
-      userData.flags.ifPresent( (flags) -> {
-        Log.d(TAG, format( "set intent flags: '%s'", valueOf(flags)) );
-        intent.addFlags(flags);
+      userData.flags.ifPresent(new Consumer<Integer>() {
+        @Override
+        public void accept(Integer flags) {
+          Log.d(TAG, format( "set intent flags: '%s'", valueOf(flags)) );
+          intent.addFlags(flags);
+        }
       });
-      userData.category.ifPresent( (category) -> {
-        Log.d(TAG, format( "set intent category: '%s'", category) );
-        intent.addCategory(category);
+      userData.category.ifPresent( new Consumer<String>() {
+        @Override
+        public void accept(String category) {
+          Log.d(TAG, format("set intent category: '%s'", category));
+          intent.addCategory(category);
+        }
       });
-      userData.packageName.ifPresent( (packageName) -> {
-        Log.d(TAG, format( "set intent package: '%s'", packageName) );
-        intent.setPackage(packageName);
+      userData.packageName.ifPresent( new Consumer<String>()  {
+        @Override
+        public void accept(String packageName) {
+          Log.d(TAG, format( "set intent package: '%s'", packageName) );
+          intent.setPackage(packageName);
+        }
       });
     }
 
