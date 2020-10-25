@@ -76,7 +76,13 @@ public class CDVBroadcaster extends CordovaPlugin {
       if (userData.has("extras") && ( hasFlags || userData.has("category") || userData.has("packageName")) ) {
 
         extras = userData.optJSONObject("extras");
-        flags = ( hasFlags ) ? Optional.ofNullable( userData.optInt("flags") ) : Optional.empty();
+        if( hasFlags ) {
+          flags = Optional.ofNullable( userData.optInt("flags") );
+        }
+        else {
+          flags = Optional.empty();
+        }
+
         category = Optional.ofNullable(userData.optString("category", null));
         packageName = Optional.ofNullable( userData.optString("packageName", null));
         isAndroidSpecific = true;
