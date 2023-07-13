@@ -10,7 +10,7 @@
     <preference name="ShowTitle" value="true" />
     <preference name="loadUrlTimeoutValue" value="60000" />
     <content src="index.html" />
-    <plugin name="cordova-plugin-whitelist" spec="1" />
+
     <access origin="*" />
     <allow-intent href="http://*/*" />
     <allow-intent href="https://*/*" />
@@ -20,11 +20,14 @@
     <allow-intent href="geo:*" />
     <platform name="android">
         <allow-intent href="market:*" />
+        <!--
         <hook src="scripts/android_after_plugin_installed.js" type="after_plugin_install" />
+        -->
+        <hook src="scripts/android_after_plugin_installed.js" type="after_prepare" />
+
     </platform>
     <platform name="ios">
         <allow-intent href="itms:*" />
         <allow-intent href="itms-apps:*" />
     </platform>
-    <plugin name="org.bsc.broadcasterTest" spec="../test" />
 </widget>

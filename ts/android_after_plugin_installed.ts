@@ -30,10 +30,10 @@ module.exports = function(context:Context) {
     let platforms = context.opts.cordova.platforms.filter( (p) => p==="android" );
     if( platforms.length === 0) return;
 
-    let rel = path.join( 'src', 'org', 'bsc', 'broadcasterApp');
+    let rel = path.join(  'org', 'bsc', 'broadcasterApp');
 
-    let source = path.join( context.opts.projectRoot, "android-assets", rel, 'MainActivity.java' );
-    let target = path.join( context.opts.projectRoot, "platforms", platforms[0], rel );
+    let source = path.join( context.opts.projectRoot, "android-assets", 'src', rel, 'MainActivity.java' );
+    let target = path.join( context.opts.projectRoot, "platforms", platforms[0], 'app', 'src', 'main', 'java', rel );
 
     console.log( "copy\n", source, "\nto\n", target);
 
