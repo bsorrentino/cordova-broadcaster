@@ -13,16 +13,15 @@
         "removeComments": true,
         "noLib": false,
         "preserveConstEnums": true,
-        "suppressImplicitAnyIndexErrors": true,
         "outDir":"scripts"
     },
+    "include": [
+        "./ts/*.ts"
+    ],
     "exclude": [
         "typings/browser",
         "typings/browser.d.ts"
     ],
     "compileOnSave": true,
     "buildOnSave": false,
-    "atom": {
-        "rewriteTsconfig": false
-    }
 }
