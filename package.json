@@ -1,13 +1,7 @@
 {
   "cordova": {
-    "plugins": {
-    },
-    "platforms": [
-      "android"
-    ]
-  },
-  "dependencies": {
-    "cordova-android": "12.0.0"
+    "plugins": {},
+    "platforms": []
   },
   "devDependencies": {
     "@types/node": "^20.4.2",
