@@ -3,17 +3,17 @@
 console.log( "INIT TEST!!");
 
 function onReady() {
-  console.log( "register didShow listener" );
+  console.log( "registering didShow listener ... " );
 
   var listener = function( e ) {
       console.log( "didShow event received! " + JSON.stringify(e) );
       window.broadcaster.removeEventListener( "didShow", listener );
   }
   window.broadcaster.addEventListener( "didShow", listener );
+  console.log( "registerd didShow listener!" );
 
   var listener1 = function( e ) {
       console.log( "didShow event received after remove! " + JSON.stringify(e) );
-      //window.broadcaster.removeEventListener( "didShow", listener1 );
   }
   window.broadcaster.addEventListener( "didShow", listener1);
 
@@ -21,6 +21,7 @@ function onReady() {
     console.log( "powerStateDidChange", e );
   });
 
+  /*
   cordova.plugins.broadcasterTest.startMonitoringPowerState(
     function(initState) {
 
@@ -31,6 +32,7 @@ function onReady() {
 
     }
   )
+  */
 }
 
 document.addEventListener('deviceready', onReady, false);
