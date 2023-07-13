@@ -20,8 +20,12 @@
   ],
   "engines": {
     "cordovaDependencies": {
-      "2.2.1": { "cordova": ">3.9.0" },
-      "2.3.0": { "cordova": ">4.0.0" }
+      "2.2.1": {
+        "cordova": ">3.9.0"
+      },
+      "2.3.0": {
+        "cordova": ">4.0.0"
+      }
     }
   },
   "author": "bsorrentino",
@@ -34,11 +38,9 @@
     "@types/cordova": "0.0.34",
     "@types/node": "^13.9.2",
     "auto-changelog": "^1.16.2",
-    "npx-run": "^2.1.2",
     "typescript": "^3.8.3"
   },
   "scripts": {
     "changelog": "auto-changelog -u"
-  },
-  "dependencies": {}
+  }
 }
