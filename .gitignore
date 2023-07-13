@@ -6,5 +6,4 @@ gen/
 platforms/
 node_modules/
 .idea/
-
-
+plugins/
