@@ -28,9 +28,9 @@ cordova platform add android
 
 ## Prepare and run
 ```
-npx cordova prepare
+cordova prepare
 
-npx cordova build
+cordova build
 
-npx cordova run
+cordova run
 ```
