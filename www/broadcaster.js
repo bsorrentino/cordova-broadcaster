@@ -79,7 +79,7 @@ var Broadcaster = /** @class */ (function () {
         // event.initEvent(type, false, false);
         var event = new Event(type, { bubbles: false, cancelable: false });
         if (data) {
-            event['data'] = data; // fix #67
+            event['data$'] = data; // fix #67
             // for backward compatibility
             for (var i in data) {
                 if (data.hasOwnProperty(i) && event[i] === undefined) {
