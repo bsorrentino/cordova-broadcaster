@@ -17,6 +17,7 @@ Android | **[LocalBroadcastManager](http://developer.android.com/reference/andro
 ## News
   date |  infos | refs
 ---- | ---- | ----
+May 11, 2024 | fix [#67](https://github.com/bsorrentino/cordova-broadcaster/issues/67) - Receive broadcast data from external barcode scanner | Thanks to [lgl017](https://github.com/lgl017) and [kmitdebus](https://github.com/kmitdebus) for valuable feedbacks
 Jul 19, 2023 | fix [#71](https://github.com/bsorrentino/cordova-broadcaster/pull/71) - Cannot find symbol "LocalBroadcastManager" | Thanks to [MrWeezle](https://github.com/MrWeezle) for valuable feedbacks
 Jul 14, 2023 | Merge pull request [#70](https://github.com/bsorrentino/cordova-broadcaster/pull/70) - move to SDK 33 --> Android X. | Thank to [phyr0s](https://github.com/phyr0s) for contribution
 Mar 19, 2020 | Concerning **Android** I've added support for **broadcast Intent to external Apps**, **receive broadcast Intents from external Apps**, **Flags & Category on Intent** | insipred by [navarrojava's fork](https://github.com/navarrojava/cordova-broadcaster/)
