@@ -75,11 +75,14 @@ var Broadcaster = /** @class */ (function () {
     Broadcaster.prototype.fireEvent = function (type, data) {
         if (!this._channelExists(type))
             return;
-        var event = document.createEvent('Event');
-        event.initEvent(type, false, false);
+        // const event = document.createEvent('Event');
+        // event.initEvent(type, false, false);
+        var event = new Event(type, { bubbles: false, cancelable: false });
         if (data) {
+            event['data$'] = data; // fix #67
+            // for backward compatibility
             for (var i in data) {
-                if (data.hasOwnProperty(i)) {
+                if (data.hasOwnProperty(i) && event[i] === undefined) {
                     event[i] = data[i];
                 }
             }
