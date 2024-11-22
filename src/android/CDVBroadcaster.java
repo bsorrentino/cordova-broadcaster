@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Build;
 import android.os.Bundle;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import android.util.Log;
@@ -157,7 +158,11 @@ public class CDVBroadcaster extends CordovaPlugin {
   protected void registerReceiver(android.content.BroadcastReceiver receiver, android.content.IntentFilter filter, boolean isGlobal) {
 
     if (isGlobal) {
-      this.webView.getContext().registerReceiver(receiver, filter);
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        this.webView.getContext().registerReceiver(receiver, filter, Context.RECEIVER_EXPORTED);
+      } else {
+        this.webView.getContext().registerReceiver(receiver, filter);
+      }
       return;
     }
     LocalBroadcastManager.getInstance(super.webView.getContext()).registerReceiver(receiver, filter);
